@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - Stackly</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+    
+    :root {
+      --primary-color: #1e3c72;
+      --secondary-color: #2a5298;
+      --card-bg: rgba(255, 255, 255, 0.2); /* Semi-transparent background for glass effect */
+      --text-color: #f0f4f8; /* Lighter text for contrast */
+      --input-border: rgba(255, 255, 255, 0.4);
+      --input-focus: #fff;
+      --button-bg: #ffc107; /* Changed button color to yellow */
+      --button-hover: #e0a800; /* Changed button hover color to a darker yellow */
+      --error-color: #ff6b6b;
+      --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --shadow-heavy: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Animated gradient background */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(-45deg, var(--primary-color), var(--secondary-color), #209ad6, #3b5998);
+      background-size: 400% 400%;
+      animation: gradientAnimation 15s ease infinite;
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      overflow: hidden;
+      color: var(--text-color);
+    }
+
+    @keyframes gradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .login-box {
+      width: 380px;
+      padding: 40px 30px;
+      border-radius: 20px;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px); /* Frosted glass effect */
+      -webkit-backdrop-filter: blur(10px); /* For Safari */
+      box-shadow: var(--shadow-heavy);
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transform: scale(0.95);
+      opacity: 0;
+      animation: fadeInScale 0.6s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    @keyframes fadeInScale {
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .login-box h2 {
+      margin-bottom: 25px;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-color);
+      letter-spacing: 1px;
+      position: relative;
+    }
+
+    .login-box h2::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70px;
+      height: 5px;
+      background: #fff;
+      border-radius: 3px;
+    }
+
+    .input-group {
+      margin: 30px 0;
+      position: relative;
+    }
+    
+    .input-group input {
+      width: 100%;
+      padding: 12px 10px;
+      border: 1px solid var(--input-border);
+      border-radius: 10px;
+      font-size: 1rem;
+      color: var(--text-color);
+      background: rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      outline: none;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .input-group input:focus {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: var(--input-focus);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+    }
+    
+    .input-group label {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      color: var(--text-color);
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+
+    .input-group input:focus + label,
+    .input-group input:not(:placeholder-shown) + label {
+      top: 0;
+      transform: translateY(-110%);
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--input-focus);
+      letter-spacing: 0.5px;
+    }
+
+    /* Custom button styles with animation */
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(45deg, var(--button-bg), var(--button-hover)); /* Updated gradient to yellow */
+      color: #000; /* Changed text color to black for better contrast */
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4); /* Updated shadow color to match button */
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-login:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(255, 193, 7, 0.6); /* Updated shadow color to match button */
+    }
+
+    .btn-login:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2); /* Updated shadow color to match button */
+    }
+
+    .btn-login:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .error-msg {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: var(--error-color);
+      font-weight: 500;
+      min-height: 20px;
+    }
+
+    .loading-spinner {
+      border: 4px solid rgba(0, 0, 0, 0.3); /* Adjusted spinner color for contrast */
+      border-radius: 50%;
+      border-top: 4px solid #000; /* Adjusted spinner color for contrast */
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>Admin Login</h2>
+    <div class="input-group">
+      <input type="email" id="email" placeholder=" " required>
+      <label for="email">Email</label>
+    </div>
+    <div class="input-group">
+      <input type="password" id="password" placeholder=" " required>
+      <label for="password">Password</label>
+    </div>
+    <button id="login-btn" class="btn-login" onclick="login()">
+      <span id="button-text">Sign In</span>
+      <div id="loading-spinner" class="loading-spinner" style="display: none;"></div>
+    </button>
+    <p id="error-msg" class="error-msg"></p>
+  </div>
+
+  <script>
+    function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorMsg = document.getElementById('error-msg');
+      const buttonText = document.getElementById('button-text');
+      const loadingSpinner = document.getElementById('loading-spinner');
+      const loginBtn = document.getElementById('login-btn');
+
+      errorMsg.textContent = '';
+      buttonText.style.display = 'none';
+      loadingSpinner.style.display = 'block';
+      loginBtn.disabled = true;
+
+      // Simulate network request
+      setTimeout(() => {
+        if (email === 'admin@enkonix.in' && password === 'admin123') {
+          errorMsg.textContent = 'Login successful!';
+          errorMsg.style.color = '#28a745';
+          window.location.href = 'Admin.html'; // Redirect to a dashboard page
+        } else {
+          errorMsg.textContent = 'Invalid email or password.';
+          errorMsg.style.color = '#ff6b6b';
+          buttonText.style.display = 'block';
+          loadingSpinner.style.display = 'none';
+          loginBtn.disabled = false;
+        }
+      }, 2000); // 2 second delay to simulate API call
+    }
+  </script>
+</body>
+</html>

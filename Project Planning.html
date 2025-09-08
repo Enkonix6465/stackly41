@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="pp.title">Project Planning - Stackly Architecture</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    <style>
+      /* CSS variables for a consistent dark theme */
+      :root {
+      --bg: #0b0d12;
+      --surface: #0f1219;
+      --glass: rgba(255,255,255,0.08);
+      --text: #e9eefc;
+      --muted: #a6b1d0;
+      --brand: #f97316;
+      --brand-2: #ea580c;
+      --accent: #bbe1fa;
+      --card: #101522;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --hero-overlay-dark: linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%);
+      --badge-bg: rgba(15,76,117,.15);
+      --badge-border: rgba(15,76,117,.35);
+      --badge-text: #cfe0ff;
+    }
+
+
+      /* Light theme overrides for a dual-theme design */
+       body.light {
+      --bg: #f0f4f9;
+      --surface: #ffffff;
+      --glass: rgba(0,0,0,0.05);
+      --text: #1d2c41;
+      --muted: #5e6d8a;
+      --brand: #f97316;
+      --brand-2: #ea580c;
+      --accent: #1b262c;
+      --card: #ffffff;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .1);
+      --hero-overlay-dark: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 100%);
+      --badge-bg: rgba(15,76,117,.05);
+      --badge-border: rgba(15,76,117,.2);
+      --badge-text: #0f4c75;
+    }
+
+      body {
+        margin: 0;
+        font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: linear-gradient(180deg, var(--bg) 0%, var(--surface) 100%);
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      a { color: inherit; text-decoration: none; }
+      img { max-width: 100%; display: block; }
+      .container { width: min(1200px, 92%); margin-inline: auto; }
+
+      /* ---------- Header (sticky, glass) ---------- */
+      .header { background-color: var(--surface); padding: 1.25rem 0; position: sticky; top: 0; z-index: 1000; box-shadow: var(--shadow); transition: background-color 0.3s ease; }
+      .logo-img { height: 40px; width: auto; margin-right: 8px; }
+      .nav-container { display: flex; justify-content: space-between; align-items: center; }
+      .logo { font-size: 1.5rem; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+      .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+      .nav { flex-grow: 1; display: flex; justify-content: flex-end; margin-right: 1rem; }
+      .nav-links { list-style: none; display: flex; gap: 1.5rem; margin: 0; padding: 0; align-items: center; }
+      .nav-links a { color: var(--muted); font-weight: 600; padding: 5px 0; transition: color .3s; position: relative; }
+      .nav-links a:hover, .nav-links a.active { color: var(--text); }
+
+      /* Dropdowns */
+      .dropdown-menu {
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(10px);
+        transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+        position: absolute;
+        top: 100%;
+        background: var(--card);
+        box-shadow: var(--shadow);
+        border-radius: 8px;
+        padding: 10px 0;
+        min-width: 150px;
+        list-style: none;
+      }
+      .nav-links li:hover > .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); transition-delay: 0.2s; }
+      .dropdown-menu a { padding: 10px 15px; color: var(--text); display: block; transition: color 0.3s ease; }
+
+      .mobile-menu-toggle { display: none; font-size: 1.5rem; cursor: pointer; }
+      .theme-toggle { display: block; }
+
+      /* Language Selector Styles from home3.html */
+      .language-selector {
+        display: flex;
+        align-items: center;
+        background-color: var(--surface);
+        border: 1px solid var(--muted);
+        border-radius: 8px;
+        padding: 6px 10px;
+        gap: 8px;
+        color: var(--text);
+      }
+      .language-selector select {
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+      .language-selector select option {
+        background-color: var(--surface);
+        color: var(--text);
+      }
+
+      @media (max-width: 780px) {
+        .dropdown-menu { position: static; background: var(--card); border: none; box-shadow: none; padding: 8px 0 0; margin-left: 16px; min-width: 140px; display: none; opacity: 1; visibility: visible; transform: none; }
+        .dropdown-menu li a { color: var(--text); padding: 10px 18px; display: block; font-weight: 500; }
+        .dropdown-menu li a:hover { background: var(--surface); color: var(--brand); }
+      }
+
+      /* Profile dropdown */
+      .profile-container { position: relative; display: inline-block; }
+      .profile-icon { width: 40px; height: 40px; border-radius: 50%; background-color: var(--brand); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; cursor: pointer; font-size: 1rem; }
+      .profile-menu { display: none; position: absolute; top: 110%; right: 0; background: var(--card); box-shadow: var(--shadow); border-radius: 8px; overflow: hidden; transition: background-color 0.3s ease; z-index: 1000; padding: 5px 0; min-width: 150px; }
+      .profile-menu.active { display: block; }
+      .profile-menu a { display: block; padding: 10px 15px; color: var(--text); white-space: nowrap; transition: color 0.3s ease, background-color 0.3s ease; }
+      .profile-menu a:hover { background-color: var(--surface); }
+      /* RTL styles from home3.html */
+      body[dir="rtl"] .nav-links{ text-align: right; }
+      body[dir="rtl"] .nav{ justify-content: flex-start; }
+      body[dir="rtl"] .dropdown-menu li a{ text-align: right; }
+      body[dir="rtl"] .footer-content > div { text-align: right; }
+      body[dir="rtl"] .footer-content{ grid-template-columns: 1.4fr 1fr 1fr 2fr; }
+      body[dir="rtl"] .footer-bottom { text-align: center; }
+      body[dir="rtl"] .welcome-content { grid-template-columns: 1fr 1.1fr; }
+      body[dir="rtl"] .welcome-text { text-align: right; }
+      body[dir="rtl"] .welcome-features { text-align: right; }
+      body[dir="rtl"] .feature-item { direction: rtl; }
+      body[dir="rtl"] .feature-item i { margin-left: 10px; margin-right: 0; }
+      body[dir="rtl"] .faq-question { direction: rtl; }
+      body[dir="rtl"] .faq-answer { direction: rtl; }
+      body[dir="rtl"] .case-study-grid { text-align: right; }
+      body[dir="rtl"] .section-title { text-align: right; }
+      body[dir="rtl"] .testimonial-text { text-align: right; }
+      body[dir="rtl"] .clients-section .swiper-slide { text-align: right; }
+      body[dir="rtl"] .cta-content { text-align: right; }
+
+      /* ---------- Hero (video + gradient + CTA) ---------- */
+      .hero-section { position:relative; height: 86vh; min-height: 560px; overflow:hidden; border-bottom: 1px solid rgba(255,255,255,.06); }
+      .hero-bg-video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter: saturate(110%) contrast(105%); }
+      .hero-gradient { position:absolute; inset:0; background: var(--hero-overlay-dark); transition: background-color 0.3s ease; }
+      /* Animated gradient shimmer on top of overlay */
+      .hero-gradient::after{
+        content:"";
+        position:absolute; inset:0;
+        background: linear-gradient(120deg, rgba(255,210,140,0.12), rgba(224,167,94,0.1), rgba(160,82,45,0.12));
+        background-size: 200% 200%;
+        animation: gradientShift 14s ease infinite;
+        pointer-events: none;
+      }
+      .hero-content { position:relative; z-index:1; height:100%; display:grid; place-items:center; text-align:center; padding: 0 16px; will-change: transform; }
+      .hero-card { max-width: 900px; }
+      .eyebrow { display:inline-flex; gap:8px; align-items:center; padding:6px 10px; border-radius:999px; font-size:.82rem; color: var(--badge-text); background: var(--badge-bg); border:1px solid var(--badge-border); }
+      .hero-title { font-size: clamp(2rem, 5.2vw, 3.6rem); margin:16px 0 10px; line-height:1.05; letter-spacing:-.015em; }
+      .hero-title .cursor { display:inline-block; width:1px; background: currentColor; animation: blink 1.2s steps(1) infinite; transform: translateY(4px); height: 1em;}
+      .hero-sub { font-size: clamp(1rem, 1.8vw, 1.2rem); color: var(--text); margin: 0 0 24px; }
+      .hero-cta { display:inline-flex; gap:12px; }
+      .btn { position: relative; display:inline-flex; align-items:center; gap:10px; padding: 14px 18px; border-radius: 12px; font-weight:700; transition: transform 0.2s ease, box-shadow .2s ease; }
+      .btn-primary { background: linear-gradient(90deg, var(--brand), var(--brand-2)); color:#ffff; box-shadow: 0 8px 20px rgba(224,167,94,.35); overflow:hidden; }
+      .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(224,167,94,.45); }
+      .btn-ghost { background: var(--glass); border:1px solid rgba(255,255,255,.14); color: var(--text); }
+
+      /* ---------- Welcome (split) ---------- */
+      .welcome-image-section { padding: 64px 0; background: radial-gradient(1000px 400px at 10% -10%, rgba(224,167,94,.18), transparent), transparent; }
+      .welcome-content { display:grid; grid-template-columns: 1.1fr 1fr; gap: 36px; align-items:center; }
+      .welcome-text h2 { font-size: clamp(1.6rem, 2.6vw, 2.2rem); margin:0 0 12px; }
+      .welcome-text p { color: var(--muted); margin: 0 0 18px; }
+      .welcome-features { display:grid; gap:12px; }
+      .feature-item { display:flex; align-items:center; gap:10px; font-weight:600; color:var(--text); }
+      .feature-item i { color: var(--accent); }
+      .welcome-image img { border-radius: 16px; box-shadow: var(--shadow); }
+
+      /* New Section Styles */
+      .team-section { padding: 70px 0; background: var(--bg); border-top: 1px solid rgba(255,255,255,.06); }
+      .section-title { text-align:center; margin:0 0 34px; }
+      .section-title h2 { font-size: clamp(1.8rem, 3vw, 2.4rem); margin:0; }
+      .team-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; text-align:center; }
+      .team-card { background: var(--card); padding: 24px; border-radius: 16px; transition: transform .3s ease; box-shadow: var(--shadow); }
+      .team-card:hover { transform: translateY(-6px); }
+      .team-card img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin: 0 auto 12px; }
+      .team-card h3 { margin:0 0 4px; }
+      .team-card p { margin:0; color: var(--muted); }
+
+      .faq-section { padding: 70px 0; }
+      .faq-item { background: var(--card); border: 1px solid rgba(255,255,255,.06); border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
+      .faq-question { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 1.1rem; }
+      .faq-question i { transition: transform 0.3s ease; }
+      .faq-answer { padding: 0 24px; color: var(--muted); max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, padding 0.4s ease-out; }
+      .faq-item.active .faq-answer { max-height: 200px; padding: 10px 24px 20px; }
+      .faq-item.active .faq-question i { transform: rotate(180deg); }
+
+      /* Case studies section */
+      .case-studies-section {
+        padding: 70px 0;
+        background: var(--surface);
+        border-top: 1px solid rgba(255,255,255,.06);
+        background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+      }
+      .case-study-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 32px; }
+      .case-study-card { background: var(--card); border: 1px solid rgba(255,255,255,.06); border-radius: 16px; padding: 32px; box-shadow: var(--shadow); transition: transform .3s ease, box-shadow .3s ease; display: flex; flex-direction: column; text-align: center; will-change: transform; }
+      .case-study-card:hover { transform: translateY(-8px); box-shadow: 0 18px 40px rgba(0,0,0,.5); }
+      .case-study-icon { font-size: 3rem; color: var(--brand-2); margin-bottom: 16px; }
+      .case-study-content h3 { font-size: 1.8rem; margin-top: 0; margin-bottom: 8px; }
+      .case-study-content p { color: var(--muted); }
+      .case-study-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; margin-top: 24px; }
+      .metric { text-align: center; padding: 12px; background: rgba(255,255,255,.05); border-radius: 8px; }
+      .metric-number { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+      .metric-label { font-size: 0.9rem; color: var(--muted); }
+
+      /* Featured */
+      .featured-section { padding: 70px 0; background: linear-gradient(180deg, #0c1018 0%, #0b0f17 100%); border-top: 1px solid rgba(255,255,255,.06); border-bottom: 1px solid rgba(255,255,255,.06); transition: background-color 0.3s ease; }
+      .cards { display:grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+      .card { background: var(--card); border:1px solid rgba(255,255,255,.06); border-radius: 16px; overflow:hidden; box-shadow: var(--shadow); transition: transform .3s ease, box-shadow .3s ease, background-color 0.3s ease; will-change: transform; }
+      .card:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(0,0,0,.5); }
+      .card img { height: 220px; width: 100%; object-fit: cover; }
+      .card-body { padding: 18px 18px 16px; }
+      .card-body h3 { margin: 2px 0 6px; font-size: 1.2rem; }
+      .meta { display:flex; align-items:center; gap:10px; color: var(--muted); font-size:.95rem; margin-bottom: 10px; }
+      .badges { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+      .badge { font-size:.8rem; font-weight:600; padding:4px 10px; border-radius:999px; background:rgba(255,255,255,.08); color:var(--text); }
+      .badge-category { background:var(--brand-2); color:#fff; }
+
+      /* Clients section */
+      .clients-section { padding: 70px 0; }
+      .client-logos { display:flex; flex-wrap:wrap; justify-content:center; gap:clamp(16px, 4vw, 36px); padding-top:20px; }
+      .client-logos img { max-height:36px; filter: grayscale(1) contrast(0.5) brightness(1.5); opacity:.8; transition: filter .3s ease; }
+      .client-logos img:hover { filter: grayscale(0) contrast(1) brightness(1); }
+
+      /* Testimonials */
+      .testimonials-section { padding: 70px 0; background: var(--surface); }
+      .testimonial-card { padding: 32px; background: var(--card); border-radius: 16px; box-shadow: var(--shadow); }
+      .testimonial-text { font-size: 1.1rem; line-height: 1.5; color: var(--muted); }
+      .testimonial-author { display:flex; align-items:center; gap:12px; margin-top:20px; }
+      .testimonial-author img { width: 50px; height: 50px; border-radius: 50%; }
+      .author-info h4 { margin:0; font-size: 1rem; }
+      .author-info p { margin:0; font-size: 0.9rem; color: var(--muted); }
+      .swiper-pagination-bullet { background: var(--muted) !important; opacity: 1 !important; }
+      .swiper-pagination-bullet-active { background: var(--brand) !important; }
+      .swiper-button-next, .swiper-button-prev { color: var(--muted) !important; }
+
+      /* CTA */
+      .cta-section { padding: 70px 0; background: var(--bg); text-align:center; }
+      .cta-card { background: url('img/') center/cover no-repeat; border-radius: 20px; padding: 60px 24px; color: #fff; position: relative; overflow: hidden; }
+      .cta-card::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.7); z-index: 1; }
+      .cta-content { position: relative; z-index: 2; }
+      .cta-content h2 { font-size: clamp(1.8rem, 3.5vw, 2.8rem); margin-bottom: 12px; }
+
+      /* Services Section */
+      .services-section { padding: 70px 0; background: var(--surface); }
+      .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+      .service-card { background: var(--card); padding: 32px; border-radius: 16px; border: 1px solid rgba(255,255,255,.06); box-shadow: var(--shadow); transition: transform .3s ease, box-shadow .3s ease; will-change: transform; text-align: center; }
+      .service-card:hover { transform: translateY(-8px); box-shadow: 0 18px 40px rgba(0,0,0,.5); }
+      .service-icon { font-size: 3rem; color: var(--brand-2); margin-bottom: 16px; }
+      .service-card h3 { font-size: 1.5rem; margin-top: 0; margin-bottom: 10px; }
+      .service-card p { color: var(--muted); margin-bottom: 20px; }
+      .service-card a { color: var(--brand); font-weight: 600; text-decoration: underline; transition: color .3s ease; }
+      .service-card a:hover { color: var(--brand-2); }
+
+      /* Project Gallery */
+      .gallery-section { padding: 70px 0; }
+      .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+      .gallery-item { position: relative; overflow: hidden; border-radius: 16px; box-shadow: var(--shadow); transition: transform .3s ease; }
+      .gallery-item img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+      .gallery-item:hover img { transform: scale(1.05); }
+      .gallery-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: flex-end; padding: 20px; opacity: 0; transition: opacity .3s ease; }
+      .gallery-item:hover .gallery-overlay { opacity: 1; }
+      .gallery-info { color: #fff; }
+      .gallery-info h4 { margin: 0; }
+      .gallery-info p { margin: 4px 0 0; font-size: 0.9rem; }
+
+      /* New Services Card */
+      .services-section-unique {
+        padding: 70px 0;
+        background: var(--bg);
+      }
+      .services-grid-unique {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        padding-top: 20px;
+      }
+      .service-card-unique {
+        background: var(--card);
+        border: 1px solid rgba(255,255,255,.06);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: transform .3s ease, box-shadow .3s ease;
+        text-align: center;
+        will-change: transform;
+      }
+      .service-card-unique:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 18px 40px rgba(0,0,0,.5);
+      }
+      .service-card-unique img {
+        height: 200px;
+        width: 100%;
+        object-fit: cover;
+      }
+      .service-card-unique-content {
+        padding: 24px;
+      }
+      .service-card-unique-content h3 {
+        font-size: 1.5rem;
+        margin-top: 0;
+        margin-bottom: 10px;
+      }
+      .service-card-unique-content p {
+        color: var(--muted);
+        margin-bottom: 20px;
+      }
+      .service-card-unique a {
+        color: var(--brand);
+        font-weight: 600;
+        text-decoration: underline;
+        transition: color .3s ease;
+      }
+      .service-card-unique a:hover {
+        color: var(--brand-2);
+      }
+
+      /* --- Footer Styles from home1.html --- */
+      .footer { background: var(--surface); border-top: 1px solid rgba(255,255,255,.06); transition: background-color 0.3s ease; }
+      .footer-content { display:grid; grid-template-columns: 2fr 1fr 1fr 1.4fr; gap: 20px; padding: 46px 0; }
+      .footer h3, .footer h4 { margin-top:0; }
+      .footer p, .footer li { color: var(--muted); transition: color 0.3s ease; }
+      .social-links { display:flex; gap:12px; margin-top:10px; }
+      .social-links a { width:38px; height:38px; display:grid; place-items:center; border-radius:10px; background: var(--glass); border:1px solid var(--glass); transition: background-color 0.3s ease; }
+      .footer ul { list-style:none; padding:0; margin:0; display:grid; gap:8px; }
+      .footer-bottom { border-top:1px solid rgba(255,255,255,.06); text-align:center; padding: 16px 0 22px; color: var(--muted); font-size:.95rem; }
+
+      /* General Utility */
+      .text-center { text-align: center; }
+
+      /* Responsive adjustments */
+      @media (max-width: 900px) {
+        .welcome-content { grid-template-columns: 1fr; }
+        .welcome-image { order: -1; }
+        .case-study-grid { grid-template-columns: 1fr; }
+        .cards { grid-template-columns: 1fr; }
+        .footer-content {
+          display: block;
+          padding: 32px 0;
+        }
+        .footer-content > div {
+          margin-bottom: 24px;
+        }
+        .footer-content > div:last-child {
+          margin-bottom: 0;
+        }
+        .footer h4, .footer h3 {
+          margin-bottom: 12px;
+        }
+        .footer ul {
+          gap: 6px;
+        }
+        .footer-bottom {
+          font-size: 1rem;
+          padding: 12px 0 18px;
+        }
+      }
+      @media (max-width: 780px) {
+        .mobile-menu-toggle { display: block; }
+        .nav { display: none; position: absolute; left: 0; right: 0; top: 100%; background: var(--surface); box-shadow: var(--shadow); padding: 1rem 0; }
+        .nav.open { display: block; }
+        .nav-links { flex-direction: column; align-items: flex-start; padding: 10px 12px 16px; }
+      }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container nav-container">
+            <a href="home1.html" class="logo">
+                <img class="logo-img" src="img/cropped-image-removebg-preview-2.png" alt="Stackly Logo">
+            </a>
+            <nav class="nav" id="site-nav">
+                <ul class="nav-links">
+                    <li class="dropdown">
+                        <a href="home1.html" data-i18n="nav.home">Home <i class="fas fa-chevron-down"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="home1.html" data-i18n="nav.home1">Home 1</a></li>
+                            <li><a href="home3.html" data-i18n="nav.home2">Home 2</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="About us.html" data-i18n="nav.about">About Us</a></li>
+                    <li class="dropdown">
+                        <a href="" data-i18n="nav.services">Services <i class="fas fa-chevron-down"></i></a>
+                        <ul class="dropdown-menu">
+                           <li><a href="Services.html" data-i18n="nav.allServices">All Services</a></li>
+             <li><a href="architectural-design.html" data-i18n="nav.architecturalDesign">Architectural Design</a></li>
+            <li><a href="construction-management.html" data-i18n="nav.constructionManagement">Construction Management</a></li>
+            <li><a href="interior-design.html" data-i18n="nav.interiorDesign">Interior Design</a></li>
+            <li><a href="structural-engineering.html" data-i18n="nav.structuralEngineering">Structural Engineering</a></li>
+            <li><a href="Landscaping.html" data-i18n="nav.auditing">Landscaping</a></li>
+             <li><a href="Project Planning.html" data-i18n="nav.corporateFinance">Project Planning</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="Blog.html" data-i18n="nav.projects">Blog</a></li>
+                    <li><a href="contact.html" data-i18n="nav.contact">Contact Us</a></li>
+                    <li class="dropdown">
+                        <a href="login.html" data-i18n="nav.login">Login <i class="fas fa-chevron-down"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="index.html" data-i18n="nav.signUpLogin">Sign Up/Login</a></li>
+                            <li><a href="sign admin.html" data-i18n="nav.adminLogin">Admin Login</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+            <div class="nav-right">
+                <div class="profile-container" style="position: relative;">
+                  <button id="profile-btn" class="profile-icon">
+                    <span id="initials-display"></span>
+                  </button>
+                  <div class="profile-menu" id="profile-dropdown">
+                    <a href="index.html" id="logout-btn" data-i18n="nav.logout">Logout</a>
+                  </div>
+                </div>
+                <div class="theme-toggle">
+                  <button id="theme-toggle" class="btn btn-secondary">
+                    <i class="fas fa-moon"></i>
+                  </button>
+                </div>
+                <div class="language-selector">
+                  <i class="fas fa-globe"></i>
+                  <select id="language-select"></select>
+                </div>
+                <div class="mobile-menu-toggle" id="mobile-toggle">
+                  <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <section class="hero-section">
+            <div class="hero-bg-video">
+                <video autoplay loop muted playsinline>
+                    <source src="https://www.pexels.com/download/video/4630091/" type="video/mp4">
+                </video>
+            </div>
+            <div class="hero-gradient"></div>
+            <div class="container hero-content">
+                <div class="hero-card" data-aos="fade-up" data-aos-duration="1000">
+                    <span class="eyebrow" data-i18n="pp.hero.eyebrow"><i class="fa-solid fa-list-check"></i> Strategic Planning</span>
+                    <h1 class="hero-title" data-i18n="pp.hero.heading">
+                        Precision in Project Planning.
+                    </h1>
+                    <p class="hero-sub" data-i18n="pp.hero.subheading">
+                        Laying the groundwork for success with meticulous timelines, budgets, and resource allocation.
+                    </p>
+                    <div class="hero-cta">
+                        <a href="#service-details" class="btn btn-primary">
+                            <i class="fa-solid fa-arrow-down"></i> <span data-i18n="pp.hero.button">Learn More</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="welcome-image-section" id="service-details">
+            <div class="container welcome-content">
+                <div class="welcome-text" data-aos="fade-right" data-aos-duration="1000">
+                    <span class="eyebrow" data-i18n="pp.philosophy.eyebrow">Our Philosophy</span>
+                    <h2 data-i18n="pp.philosophy.heading">Charting a Course for Success.</h2>
+                    <p data-i18n="pp.philosophy.p1">Effective project planning is the foundation of every successful venture. Our approach involves a detailed, collaborative process to define project scope, set realistic goals, and mitigate potential risks from the outset. We work closely with our clients to create a roadmap that ensures clarity, efficiency, and alignment with their strategic vision.</p>
+                    <div class="welcome-features">
+                        <div class="feature-item"><i class="fas fa-check-circle"></i> <span data-i18n="pp.philosophy.feature1">Comprehensive Scope Definition</span></div>
+                        <div class="feature-item"><i class="fas fa-check-circle"></i> <span data-i18n="pp.philosophy.feature2">Integrated Risk Management</span></div>
+                        <div class="feature-item"><i class="fas fa-check-circle"></i> <span data-i18n="pp.philosophy.feature3">Transparent Stakeholder Communication</span></div>
+                    </div>
+                </div>
+                <div class="welcome-image" data-aos="fade-left" data-aos-duration="1000">
+                    <img src="https://images.pexels.com/photos/3184454/pexels-photo-3184454.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="A team of professionals collaborating on a project plan">
+                </div>
+            </div>
+        </section>
+
+        <section class="services-section-unique">
+            <div class="container">
+                <div class="section-title">
+                    <span class="eyebrow" data-i18n="pp.process.eyebrow">Our Services</span>
+                    <h2 data-i18n="pp.process.heading">Key Elements of Our Planning Process</h2>
+                </div>
+                <div class="services-grid-unique">
+                    <div class="service-card-unique" data-aos="fade-up" data-aos-duration="600">
+                        <img src="https://cdn.pixabay.com/photo/2015/07/17/22/42/whiteboard-849803_1280.jpg" alt="Project Timeline & Scheduling">
+                        <div class="service-card-unique-content">
+                            <h3 data-i18n="pp.process.card1.heading">Timeline & Scheduling</h3>
+                            <p data-i18n="pp.process.card1.p">We develop a detailed, phased schedule that outlines all project milestones, dependencies, and deadlines to keep your project on track.</p>
+                        </div>
+                    </div>
+                    <div class="service-card-unique" data-aos="fade-up" data-aos-duration="800">
+                        <img src="https://images.pexels.com/photos/386009/pexels-photo-386009.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Budgeting & Cost Management">
+                        <div class="service-card-unique-content">
+                            <h3 data-i18n="pp.process.card2.heading">Budgeting & Cost Management</h3>
+                            <p data-i18n="pp.process.card2.p">Our experts create a realistic budget, and a cost management plan to ensure financial transparency and prevent unforeseen expenditures.</p>
+                        </div>
+                    </div>
+                    <div class="service-card-unique" data-aos="fade-up" data-aos-duration="1000">
+                        <img src="https://images.pexels.com/photos/3184328/pexels-photo-3184328.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Stakeholder & Resource Coordination">
+                        <div class="service-card-unique-content">
+                            <h3 data-i18n="pp.process.card3.heading">Stakeholder & Resource Coordination</h3>
+                            <p data-i18n="pp.process.card3.p">We facilitate communication and coordinate resources, from personnel to materials, to ensure everyone is working towards a common goal.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="gallery-section">
+            <div class="container">
+                <div class="section-title">
+                    <span class="eyebrow" data-i18n="pp.gallery.eyebrow">Our Plans in Action</span>
+                    <h2 data-i18n="pp.gallery.heading">Successful Project Blueprints</h2>
+                </div>
+                <div class="gallery-grid">
+                    <div class="gallery-item" data-aos="fade-up" data-aos-duration="600">
+                        <img src="https://cdn.pixabay.com/photo/2014/10/22/17/34/los-angeles-498285_1280.jpg" alt="Commercial Building Project">
+                        <div class="gallery-overlay">
+                            <div class="gallery-info">
+                                <h4 data-i18n="cm.gallery.card1.heading">The Metropolis Tower</h4>
+                                <p data-i18n="cm.gallery.card1.p">High-Rise Commercial</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-aos="fade-up" data-aos-duration="800">
+                        <img src="https://cdn.pixabay.com/photo/2022/04/10/19/33/house-7124141_1280.jpg" alt="Residential Home Construction">
+                        <div class="gallery-overlay">
+                            <div class="gallery-info">
+                                <h4 data-i18n="cm.gallery.card2.heading">The Oakwood Residential Complex</h4>
+                                <p data-i18n="cm.gallery.card2.p">Multi-Family Residential</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-aos="fade-up" data-aos-duration="1000">
+                        <img src="https://cdn.pixabay.com/photo/2023/03/29/10/27/hotel-7885138_1280.jpg" alt="Hospitality Project">
+                        <div class="gallery-overlay">
+                            <div class="gallery-info">
+                                <h4 data-i18n="cm.gallery.card3.heading">The Haven Hotel</h4>
+                                <p data-i18n="cm.gallery.card3.p">Hospitality Development</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="container">
+                <div class="cta-card" style="background-image: url('img/phone-1678289_640.jpg');">
+                    <div class="cta-content" data-aos="zoom-in" data-aos-duration="1000">
+                        <h2 data-i18n="cta.heading">Ready to Start Your Next Project?</h2>
+                        <p data-i18n="cta.subheading">Let's build something great together. Contact us today for a consultation.</p>
+                        <a href="contact.html" class="btn btn-primary" data-i18n="cta.button">Get in Touch</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+  <footer class="footer">
+        <div class="container footer-content">
+            <div>
+                <a href="#" class="logo">
+                    <img class="logo-img" src="img/cropped-image-removebg-preview-2.png" alt="BuildSphere Logo">
+                </a>
+                <p>Leading the way in innovative and sustainable architectural solutions.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div>
+                <h4>Explore</h4>
+                <ul>
+                    <li><a href="home1.html" data-i18n="footer.explore.about">Home</a></li>
+                    <li><a href="About us.html" data-i18n="footer.explore.services">About us</a></li>
+                    <li><a href="Services.html" data-i18n="footer.explore.projects">Services</a></li>
+                    <li><a href="Blog.html" data-i18n="footer.explore.blog">Blog</a></li>
+                    <li><a href="contact.html" data-i18n="footer.explore.contact">Contact Us</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Services</h4>
+                <ul>
+                     <li><a href="architectural-design.html" data-i18n="nav.architecturalDesign">Architectural Design</a></li>
+            <li><a href="construction-management.html" data-i18n="nav.constructionManagement">Construction Management</a></li>
+            <li><a href="interior-design.html" data-i18n="nav.interiorDesign">Interior Design</a></li>
+            <li><a href="structural-engineering.html" data-i18n="nav.structuralEngineering">Structural Engineering</a></li>
+            <li><a href="Landscaping.html" data-i18n="nav.auditing">Landscaping</a></li>
+             <li><a href="Project Planning.html" data-i18n="nav.corporateFinance">Project Planning</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Contact Info</h4>
+                <p data-i18n="footer.contact.address">123 Architecture Lane, Building 45, Design City, DC 67890</p>
+                <p data-i18n="footer.contact.email">info@Stackly.com</p>
+                <p data-i18n="footer.contact.phone">+1 (555) 123-4567</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p data-i18n="footer.copyright">  © 2025 Stackly. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+      AOS.init();
+
+      const themeToggle = document.getElementById('theme-toggle');
+      const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
+
+      const currentTheme = localStorage.getItem('theme');
+      if (currentTheme) {
+        document.body.classList.toggle('light', currentTheme === 'light');
+      } else {
+        document.body.classList.toggle('light', !prefersDarkScheme.matches);
+      }
+
+      themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('light');
+        let theme = 'dark';
+        if (document.body.classList.contains('light')) {
+          theme = 'light';
+        }
+        localStorage.setItem('theme', theme);
+      });
+
+      const mobileToggle = document.getElementById('mobile-toggle');
+      const siteNav = document.getElementById('site-nav');
+      mobileToggle.addEventListener('click', () => {
+          siteNav.classList.toggle('open');
+      });
+
+      // --- Scripts for header/footer and functionality from both files ---
+     
+      const profileBtn = document.getElementById('profile-btn');
+      const profileDropdown = document.getElementById('profile-dropdown');
+      const initialsDisplay = document.getElementById('initials-display');
+      const logoutBtn = document.getElementById('logout-btn');
+
+      function updateProfileButton() {
+        const userData = JSON.parse(localStorage.getItem('userData') || "{}");
+        if (userData && userData.firstName && userData.lastName) {
+          const initials = `${userData.firstName.charAt(0)}${userData.lastName.charAt(0)}`.toUpperCase();
+          initialsDisplay.textContent = initials;
+          profileBtn.style.display = 'flex';
+        } else {
+          profileBtn.style.display = 'none';
+        }
+      }
+
+      function toggleDropdown() { profileDropdown.classList.toggle('active'); }
+      function handleLogout() {
+        localStorage.removeItem('userData'); localStorage.removeItem('isLoggedIn');
+        const messageBox = document.createElement('div');
+        messageBox.innerHTML = 'Logged out successfully! <i class="fas fa-check-circle"></i>';
+        messageBox.style.cssText = `
+          position: fixed; top: 20px; right: 20px; background-color: var(--brand); color: white;
+          padding: 15px 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,.2);
+          z-index: 9999; display: flex; align-items: center; gap: 10px; animation: fadeOut 3s forwards;
+        `;
+        document.body.appendChild(messageBox);
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `
+          @keyframes fadeOut { 0% { opacity: 1; transform: translateY(0);} 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px);} }
+        `;
+        document.head.appendChild(styleSheet);
+        setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+      }
+
+      profileBtn?.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(); });
+      logoutBtn?.addEventListener('click', handleLogout);
+      document.addEventListener('click', (e) => {
+        if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) profileDropdown.classList.remove('active');
+      });
+      
+
+      // Language translation
+      const languageSelect = document.getElementById('language-select');
+      const languages = {
+        'en': 'English',
+        'ar': 'Arabic',
+        'he': 'Hebrew'
+      };
+
+      const translations = {
+        'en': {
+          'pp.title': 'Project Planning - Stackly Architecture',
+          'nav.home': 'Home',
+          'nav.home1': 'Home 1',
+          'nav.home2': 'Home 2',
+          'nav.about': 'About Us',
+          'nav.services': 'Services',
+          'nav.allServices': 'All Services',
+          'nav.architecturalDesign': 'Architectural Design',
+          'nav.constructionManagement': 'Construction Management',
+          'nav.interiorDesign': 'Interior Design',
+          'nav.structuralEngineering': 'Structural Engineering',
+          'nav.auditing': 'Landscaping',
+          'nav.corporateFinance': 'Project Planning',
+          'nav.projects': 'Blog',
+          'nav.contact': 'Contact Us',
+          'nav.login': 'Login',
+          'nav.signUpLogin': 'Sign Up/Login',
+          'nav.adminLogin': 'Admin Login',
+          'nav.logout': 'Logout',
+          'pp.hero.eyebrow': 'Strategic Planning',
+          'pp.hero.heading': 'Precision in Project Planning.',
+          'pp.hero.subheading': 'Laying the groundwork for success with meticulous timelines, budgets, and resource allocation.',
+          'pp.hero.button': 'Learn More',
+          'pp.philosophy.eyebrow': 'Our Philosophy',
+          'pp.philosophy.heading': 'Charting a Course for Success.',
+          'pp.philosophy.p1': 'Effective project planning is the foundation of every successful venture. Our approach involves a detailed, collaborative process to define project scope, set realistic goals, and mitigate potential risks from the outset. We work closely with our clients to create a roadmap that ensures clarity, efficiency, and alignment with their strategic vision.',
+          'pp.philosophy.feature1': 'Comprehensive Scope Definition',
+          'pp.philosophy.feature2': 'Integrated Risk Management',
+          'pp.philosophy.feature3': 'Transparent Stakeholder Communication',
+          'pp.process.eyebrow': 'Our Services',
+          'pp.process.heading': 'Key Elements of Our Planning Process',
+          'pp.process.card1.heading': 'Timeline & Scheduling',
+          'pp.process.card1.p': 'We develop a detailed, phased schedule that outlines all project milestones, dependencies, and deadlines to keep your project on track.',
+          'pp.process.card2.heading': 'Budgeting & Cost Management',
+          'pp.process.card2.p': 'Our experts create a realistic budget, and a cost management plan to ensure financial transparency and prevent unforeseen expenditures.',
+          'pp.process.card3.heading': 'Stakeholder & Resource Coordination',
+          'pp.process.card3.p': 'We facilitate communication and coordinate resources, from personnel to materials, to ensure everyone is working towards a common goal.',
+          'pp.gallery.eyebrow': 'Our Plans in Action',
+          'pp.gallery.heading': 'Successful Project Blueprints',
+          'pp.gallery.card1.heading': 'Urban Oasis Initiative',
+          'pp.gallery.card1.p': 'Large-Scale Urban Development',
+          'pp.gallery.card2.heading': 'Tech Park Expansion Project',
+          'pp.gallery.card2.p': 'Commercial & Industrial Planning',
+          'pp.gallery.card3.heading': 'Riverside Community Plan',
+          'pp.gallery.card3.p': 'Sustainable Residential Development',
+          'cta.heading': 'Ready to Start Your Next Project?',
+          'cta.subheading': 'Let\'s build something great together. Contact us today for a consultation.',
+          'cta.button': 'Get in Touch',
+          'footer.tagline': 'Architecting the future, one project at a time.',
+          'footer.services.heading': 'Services',
+          'footer.services.link1': 'Architectural Design',
+          'footer.services.link2': 'Construction Management',
+          'footer.services.link3': 'Interior Design',
+          'footer.services.link4': 'Structural Engineering',
+          'footer.company.heading': 'Company',
+          'footer.company.link1': 'About Us',
+          'footer.company.link2': 'Careers',
+          'footer.company.link3': 'News',
+          'footer.company.link4': 'Contact',
+          'footer.newsletter.heading': 'Newsletter',
+          'footer.newsletter.subheading': 'Stay up to date with our latest news and projects.',
+          'footer.newsletter.placeholder': 'Your email address',
+          'footer.newsletter.button': 'Subscribe',
+          'footer.copyright': '&copy; 2024 Stackly. All rights reserved.'
+        },
+        'ar': {
+          'pp.title': 'تخطيط المشاريع - ستاكلي للهندسة المعمارية',
+          'nav.home': 'الرئيسية',
+          'nav.home1': 'الرئيسية 1',
+          'nav.home2': 'الرئيسية 2',
+          'nav.about': 'من نحن',
+          'nav.services': 'الخدمات',
+          'nav.allServices': 'جميع الخدمات',
+          'nav.architecturalDesign': 'التصميم المعماري',
+          'nav.constructionManagement': 'إدارة الإنشاءات',
+          'nav.interiorDesign': 'التصميم الداخلي',
+          'nav.structuralEngineering': 'الهندسة الإنشائية',
+          'nav.auditing': 'تنسيق المواقع',
+          'nav.corporateFinance': 'تخطيط المشاريع',
+          'nav.projects': 'المدونة',
+          'nav.contact': 'اتصل بنا',
+          'nav.login': 'تسجيل الدخول',
+          'nav.signUpLogin': 'تسجيل/دخول',
+          'nav.adminLogin': 'دخول المدير',
+          'nav.logout': 'تسجيل الخروج',
+          'pp.hero.eyebrow': 'التخطيط الاستراتيجي',
+          'pp.hero.heading': 'دقة في تخطيط المشاريع.',
+          'pp.hero.subheading': 'نضع الأساس للنجاح من خلال جداول زمنية وميزانيات وتخصيص موارد دقيقة.',
+          'pp.hero.button': 'تعرف على المزيد',
+          'pp.philosophy.eyebrow': 'فلسفتنا',
+          'pp.philosophy.heading': 'رسم مسار للنجاح.',
+          'pp.philosophy.p1': 'التخطيط الفعال للمشروع هو أساس كل مشروع ناجح. يتضمن نهجنا عملية تفصيلية وتعاونية لتحديد نطاق المشروع، وتحديد أهداف واقعية، وتخفيف المخاطر المحتملة منذ البداية. نعمل عن كثب مع عملائنا لإنشاء خارطة طريق تضمن الوضوح والكفاءة والاتساق مع رؤيتهم الاستراتيجية.',
+          'pp.philosophy.feature1': 'تحديد شامل للنطاق',
+          'pp.philosophy.feature2': 'إدارة مخاطر متكاملة',
+          'pp.philosophy.feature3': 'تواصل شفاف مع أصحاب المصلحة',
+          'pp.process.eyebrow': 'خدماتنا',
+          'pp.process.heading': 'العناصر الأساسية لعملية التخطيط لدينا',
+          'pp.process.card1.heading': 'الجدول الزمني والتوقيت',
+          'pp.process.card1.p': 'نحن نطور جدولًا زمنيًا تفصيليًا ومرحليًا يحدد جميع المعالم الرئيسية للمشروع، والاعتماديات، والمواعيد النهائية للحفاظ على مشروعك على المسار الصحيح.',
+          'pp.process.card2.heading': 'الميزانية وإدارة التكاليف',
+          'pp.process.card2.p': 'يضع خبراؤنا ميزانية واقعية، وخطة لإدارة التكاليف لضمان الشفافية المالية ومنع النفقات غير المتوقعة.',
+          'pp.process.card3.heading': 'تنسيق أصحاب المصلحة والموارد',
+          'pp.process.card3.p': 'نحن نسهل التواصل وننسق الموارد، من الأفراد إلى المواد، لضمان أن الجميع يعملون نحو هدف مشترك.',
+          'pp.gallery.eyebrow': 'خططنا في العمل',
+          'pp.gallery.heading': 'مخططات المشاريع الناجحة',
+          'pp.gallery.card1.heading': 'مبادرة الواحة الحضرية',
+          'pp.gallery.card1.p': 'تطوير حضري واسع النطاق',
+          'pp.gallery.card2.heading': 'مشروع توسعة مجمع التكنولوجيا',
+          'pp.gallery.card2.p': 'التخطيط التجاري والصناعي',
+          'pp.gallery.card3.heading': 'خطة مجتمع ريفرسايد',
+          'pp.gallery.card3.p': 'تطوير سكني مستدام',
+          'cta.heading': 'هل أنت مستعد لبدء مشروعك التالي؟',
+          'cta.subheading': 'دعنا نبني شيئًا رائعًا معًا. اتصل بنا اليوم للاستشارة.',
+          'cta.button': 'اتصل بنا',
+          'footer.tagline': 'نصمم المستقبل، مشروعًا تلو الآخر.',
+          'footer.services.heading': 'الخدمات',
+          'footer.services.link1': 'التصميم المعماري',
+          'footer.services.link2': 'إدارة الإنشاءات',
+          'footer.services.link3': 'التصميم الداخلي',
+          'footer.services.link4': 'الهندسة الإنشائية',
+          'footer.company.heading': 'الشركة',
+          'footer.company.link1': 'من نحن',
+          'footer.company.link2': 'الوظائف',
+          'footer.company.link3': 'الأخبار',
+          'footer.company.link4': 'اتصل',
+          'footer.newsletter.heading': 'الرسالة الإخبارية',
+          'footer.newsletter.subheading': 'ابق على اطلاع بآخر أخبارنا ومشاريعنا.',
+          'footer.newsletter.placeholder': 'عنوان بريدك الإلكتروني',
+          'footer.newsletter.button': 'اشتراك',
+          'footer.copyright': '&copy; 2024 ستاكلي. جميع الحقوق محفوظة.'
+        },
+        'he': {
+          'pp.title': 'תכנון פרויקטים - Stackly אדריכלות',
+          'nav.home': 'בית',
+          'nav.home1': 'בית 1',
+          'nav.home2': 'בית 2',
+          'nav.about': 'אודותינו',
+          'nav.services': 'שירותים',
+          'nav.allServices': 'כל השירותים',
+          'nav.architecturalDesign': 'עיצוב אדריכלי',
+          'nav.constructionManagement': 'ניהול בנייה',
+          'nav.interiorDesign': 'עיצוב פנים',
+          'nav.structuralEngineering': 'הנדסה מבנית',
+          'nav.auditing': 'גינון',
+          'nav.corporateFinance': 'תכנון פרויקטים',
+          'nav.projects': 'בלוג',
+          'nav.contact': 'צור קשר',
+          'nav.login': 'התחברות',
+          'nav.signUpLogin': 'הרשמה/התחברות',
+          'nav.adminLogin': 'התחברות מנהל',
+          'nav.logout': 'התנתקות',
+          'pp.hero.eyebrow': 'תכנון אסטרטגי',
+          'pp.hero.heading': 'דיוק בתכנון פרויקטים.',
+          'pp.hero.subheading': 'אנו מניחים את הבסיס להצלחה עם לוחות זמנים, תקציבים והקצאת משאבים קפדניים.',
+          'pp.hero.button': 'למד עוד',
+          'pp.philosophy.eyebrow': 'הפילוסופיה שלנו',
+          'pp.philosophy.heading': 'מתווים מסלול להצלחה.',
+          'pp.philosophy.p1': 'תכנון פרויקטים יעיל הוא הבסיס לכל מיזם מצליח. הגישה שלנו כוללת תהליך מפורט ושיתופי פעולה כדי להגדיר את היקף הפרויקט, להציב יעדים ריאליים, ולהפחית סיכונים פוטנציאליים מההתחלה. אנו עובדים בצמוד עם לקוחותינו כדי ליצור מפת דרכים המבטיחה בהירות, יעילות, והתאמה לחזון האסטרטגי שלהם.',
+          'pp.philosophy.feature1': 'הגדרת היקף מקיפה',
+          'pp.philosophy.feature2': 'ניהול סיכונים משולב',
+          'pp.philosophy.feature3': 'תקשורת שקופה עם בעלי עניין',
+          'pp.process.eyebrow': 'השירותים שלנו',
+          'pp.process.heading': 'היבטים מרכזיים בתהליך התכנון שלנו',
+          'pp.process.card1.heading': 'לוח זמנים ותזמון',
+          'pp.process.card1.p': 'אנו מפתחים לוח זמנים מפורט ומדורג המפרט את כל אבני הדרך, התלות והמועדים של הפרויקט כדי לשמור על הפרויקט שלכם במסלול הנכון.',
+          'pp.process.card2.heading': 'תקצוב וניהול עלויות',
+          'pp.process.card2.p': 'המומחים שלנו יוצרים תקציב ריאליסטי, ותוכנית לניהול עלויות כדי להבטיח שקיפות פיננסית ולמנוע הוצאות בלתי צפויות.',
+          'pp.process.card3.heading': 'תיאום בעלי עניין ומשאבים',
+          'pp.process.card3.p': 'אנו מאפשרים תקשורת ומתאמים משאבים, החל מאנשי צוות ועד חומרים, כדי להבטיח שכולם עובדים לקראת מטרה משותפת.',
+          'pp.gallery.eyebrow': 'התוכניות שלנו בפעולה',
+          'pp.gallery.heading': 'תכניות פרויקטים מוצלחות',
+          'pp.gallery.card1.heading': 'יוזמת נווה המדבר העירוני',
+          'pp.gallery.card1.p': 'פיתוח עירוני רחב היקף',
+          'pp.gallery.card2.heading': 'פרויקט הרחבת פארק הטכנולוגיה',
+          'pp.gallery.card2.p': 'תכנון מסחרי ותעשייתי',
+          'pp.gallery.card3.heading': 'תוכנית קהילת ריברסייד',
+          'pp.gallery.card3.p': 'פיתוח מגורים בר-קיימא',
+          'cta.heading': 'מוכנים להתחיל את הפרויקט הבא שלכם?',
+          'cta.subheading': 'בואו נבנה יחד משהו גדול. צרו איתנו קשר עוד היום לייעוץ.',
+          'cta.button': 'צור קשר',
+          'footer.tagline': 'אדריכלות העתיד, פרויקט אחר פרויקט.',
+          'footer.services.heading': 'שירותים',
+          'footer.services.link1': 'עיצוב אדריכלי',
+          'footer.services.link2': 'ניהול בנייה',
+          'footer.services.link3': 'עיצוב פנים',
+          'footer.services.link4': 'הנדסה מבנית',
+          'footer.company.heading': 'חברה',
+          'footer.company.link1': 'אודותינו',
+          'footer.company.link2': 'קריירה',
+          'footer.company.link3': 'חדשות',
+          'footer.company.link4': 'צור קשר',
+          'footer.newsletter.heading': 'עלון חדשות',
+          'footer.newsletter.subheading': 'הישאר מעודכן בחדשות והפרויקטים האחרונים שלנו.',
+          'footer.newsletter.placeholder': 'כתובת הדוא"ל שלך',
+          'footer.newsletter.button': 'הירשם',
+          'footer.copyright': '&copy; 2024 Stackly. כל הזכויות שמורות.'
+        }
+      };
+
+      const currentLang = localStorage.getItem('lang') || 'en';
+
+      function updateContent(lang) {
+        document.querySelectorAll('[data-i18n]').forEach(element => {
+          const key = element.dataset.i18n;
+          if (translations[lang] && translations[lang][key]) {
+            element.textContent = translations[lang][key];
+          }
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+          const key = element.dataset.i18n-placeholder;
+          if (translations[lang] && translations[lang][key]) {
+            element.placeholder = translations[lang][key];
+          }
+        });
+        document.documentElement.setAttribute('lang', lang);
+        if (lang === 'ar' || lang === 'he') {
+          document.documentElement.setAttribute('dir', 'rtl');
+        } else {
+          document.documentElement.removeAttribute('dir');
+        }
+        localStorage.setItem('lang', lang);
+      }
+
+      if (languageSelect) {
+        for (const [code, name] of Object.entries(languages)) {
+          const option = document.createElement('option');
+          option.value = code;
+          option.textContent = name;
+          languageSelect.appendChild(option);
+        }
+        languageSelect.value = currentLang;
+        languageSelect.addEventListener('change', (event) => {
+          updateContent(event.target.value);
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        updateProfileButton();
+        updateContent(currentLang);
+      });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="title">Nexus Architecture & Construction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <style>
+    /* CSS variables for a consistent dark theme from home1.html */
+    :root {
+      --bg: #0b0d12;
+      --surface: #0f1219;
+      --glass: rgba(255,255,255,0.08);
+      --text: #e9eefc;
+      --muted: #a6b1d0;
+      --brand: #f97316;
+      --brand-2: #ea580c;
+      --accent: #bbe1fa;
+      --card: #101522;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --hero-overlay-dark: linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%);
+      --badge-bg: rgba(15,76,117,.15);
+      --badge-border: rgba(15,76,117,.35);
+      --badge-text: #cfe0ff;
+    }
+
+    body.light {
+      --bg: #f0f4f9;
+      --surface: #ffffff;
+      --glass: rgba(0,0,0,0.05);
+      --text: #1d2c41;
+      --muted: #5e6d8a;
+      --brand: #f97316;
+      --brand-2: #ea580c;
+      --accent: #1b262c;
+      --card: #ffffff;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .1);
+      --hero-overlay-dark: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 100%);
+      --badge-bg: rgba(15,76,117,.05);
+      --badge-border: rgba(15,76,117,.2);
+      --badge-text: #0f4c75;
+    }
+    
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: linear-gradient(180deg, var(--bg) 0%, var(--surface) 100%);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    .container { width: min(1200px, 92%); margin-inline: auto; }
+
+    /* ---------- Header (sticky, glass) ---------- */
+    .header { background-color: var(--surface); padding: 1.25rem 0; position: sticky; top: 0; z-index: 1000; box-shadow: var(--shadow); transition: background-color 0.3s ease; }
+    .logo-img { height: 40px; width: auto; margin-right: 8px; }
+    .nav-container { display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 1.5rem; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+    .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+    .nav { flex-grow: 1; display: flex; justify-content: flex-end; margin-right: 1rem; }
+    .nav-links { list-style: none; display: flex; gap: 1.5rem; margin: 0; padding: 0; align-items: center; }
+    .nav-links a { color: var(--muted); font-weight: 600; padding: 5px 0; transition: color .3s; position: relative; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); }
+    .dropdown-menu {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+      position: absolute;
+      top: 100%;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      border-radius: 8px;
+      padding: 10px 0;
+      min-width: 150px;
+      list-style: none;
+    }
+    .nav-links li:hover > .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); transition-delay: 0.2s; }
+    .dropdown-menu a { padding: 10px 15px; color: var(--text); display: block; transition: color 0.3s ease; }
+    .mobile-menu-toggle { display: none; font-size: 1.5rem; cursor: pointer; }
+    .theme-toggle { display: block; }
+    .language-selector {
+      display: flex;
+      align-items: center;
+      background-color: var(--surface);
+      border: 1px solid var(--muted);
+      border-radius: 8px;
+      padding: 6px 10px;
+      gap: 8px;
+      color: var(--text);
+    }
+    .language-selector select {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .language-selector select option {
+      background-color: var(--surface);
+      color: var(--text);
+    }
+    @media (max-width: 780px) {
+      .dropdown-menu { position: static; background: var(--card); border-radius: 8px; box-shadow: var(--shadow); padding: 8px 0; margin-left: 16px; min-width: 140px; display: none; opacity: 1; visibility: visible; transform: none; }
+      .dropdown-menu li a { color: var(--text); padding: 10px 18px; display: block; font-weight: 500; }
+      .dropdown-menu li a:hover { background: var(--surface); color: var(--brand); }
+    }
+    .profile-container { position: relative; display: inline-block; }
+    .profile-icon { width: 40px; height: 40px; border-radius: 50%; background-color: var(--brand); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; cursor: pointer; font-size: 1rem; }
+    .profile-menu { display: none; position: absolute; top: 110%; right: 0; background: var(--card); box-shadow: var(--shadow); border-radius: 8px; overflow: hidden; transition: background-color 0.3s ease; z-index: 1000; padding: 5px 0; min-width: 150px; }
+    .profile-menu.active { display: block; }
+    .profile-menu a { display: block; padding: 10px 15px; color: var(--text); white-space: nowrap; transition: color 0.3s ease, background-color 0.3s ease; }
+    .profile-menu a:hover { background-color: var(--surface); }
+    /* Mobile-specific styles from home1.html */
+    @media (max-width: 780px) {
+      .mobile-menu-toggle { display: block; }
+      .nav { display: none; position: absolute; left: 0; right: 0; top: 100%; background: var(--surface); box-shadow: var(--shadow); padding: 1rem 0; }
+      .nav.open { display: block; }
+      .nav-links { flex-direction: column; align-items: flex-start; padding: 10px 12px 16px; }
+      .dropdown:hover .dropdown-menu { display: none; }
+      .dropdown .dropdown-toggle::after{ content: ""; }
+      .dropdown-menu { position: relative; border: none; background: transparent; padding: 6px 0 10px; display: block; }
+    }
+    body[dir="rtl"] .nav-links{ text-align: right; }
+    body[dir="rtl"] .nav{ justify-content: flex-start; }
+    body[dir="rtl"] .dropdown-menu li a{ text-align: right; }
+    body[dir="rtl"] .hero-content, body[dir="rtl"] .services-section, body[dir="rtl"] .stats-section, body[dir="rtl"] .calculator-section, body[dir="rtl"] .team-section, body[dir="rtl"] .testimonials, body[dir="rtl"] .newsletter { text-align: right; }
+    body[dir="rtl"] .footer-content > div { text-align: right; }
+    body[dir="rtl"] .footer-content{ grid-template-columns: 1.4fr 1fr 1fr 2fr; }
+    body[dir="rtl"] .footer-bottom { text-align: center; }
+
+    /* --- Footer Styles from home1.html --- */
+     .footer { background: var(--surface); border-top: 1px solid rgba(255,255,255,.06); transition: background-color 0.3s ease; }
+    .footer-content { display:grid; grid-template-columns: 2fr 1fr 1fr 1.4fr; gap: 20px; padding: 46px 0; }
+    .footer h3, .footer h4 { margin-top:0; }
+    .footer p, .footer li { color: var(--muted); transition: color 0.3s ease; }
+    .social-links { display:flex; gap:12px; margin-top:10px; }
+    .social-links a { width:38px; height:38px; display:grid; place-items:center; border-radius:10px; background: var(--glass); border:1px solid var(--glass); transition: background-color 0.3s ease; }
+    .footer ul { list-style:none; padding:0; margin:0; display:grid; gap:8px; }
+    .footer-bottom { border-top:1px solid rgba(255,255,255,.06); text-align:center; padding: 16px 0 22px; color: var(--muted); font-size:.95rem; }
+
+
+    /* Other styles from home3.html */
+    .hero-section {
+        position: relative;
+        height: 90vh;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+    .video-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 1;
+    }
+    .hero-section::after { 
+        content: ""; 
+        position: absolute; 
+        inset: 0; 
+        background: rgba(0,0,0,0.6);
+        z-index: 2;
+    }
+    .hero-content{
+        position:relative; 
+        z-index:3; 
+        max-width:900px;
+    }
+    .hero-content .eyebrow{display:inline-block; padding:6px 12px; background:rgba(255,255,255,0.1); border-radius:50px; font-size:.9rem; margin-bottom:12px;}
+    .hero-content h1{font-size:clamp(2rem,5vw,3.5rem); margin-bottom:16px;}
+    .hero-content p{color:var(--muted); margin-bottom:24px;}
+    .btn{padding:14px 20px; border-radius:12px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:8px; border:none;}
+    .btn-primary{background:var(--brand); color:#fff;}
+    .btn-primary:hover{background:var(--brand-2);}
+    .services-section{padding:80px 0; background:var(--surface);}
+    .services-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:24px;}
+    .service-card{background:var(--card); padding:32px; border-radius:16px; text-align:center; box-shadow:var(--shadow); transition:.3s;}
+    .service-card:hover{transform:translateY(-6px);}
+    .service-card i{font-size:2rem; color:var(--accent); margin-bottom:12px;}
+    .stats-section{padding:80px 0; text-align:center;}
+    .stats-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:24px;}
+    .stat-card{background:var(--card); padding:24px; border-radius:16px; box-shadow:var(--shadow);}
+    .stat-number{font-size:2rem; font-weight:800; color:var(--accent);}
+    .team-section{padding:80px 0;}
+    .team-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:24px;}
+    .team-card{background:var(--card); padding:24px; border-radius:16px; text-align:center; transition:.3s; box-shadow:var(--shadow);}
+    .team-card:hover{transform:scale(1.05);}
+    .team-card img{width:120px; height:120px; border-radius:50%; object-fit:cover; margin-bottom:12px;}
+    .testimonials{padding:80px 0; background:var(--surface); text-align:center;}
+    .testimonial-slider{display:flex; overflow-x:auto; gap:24px; scroll-snap-type:x mandatory;}
+    .testimonial{flex:0 0 300px; background:var(--card); padding:24px; border-radius:16px; box-shadow:var(--shadow); scroll-snap-align:start;}
+    .stars{color:var(--accent); margin-bottom:8px;}
+    .newsletter{padding:80px 0; text-align:center; background:url('img/phone-1678289_640.jpg') center/cover no-repeat; position:relative;}
+    .newsletter::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,0.6);}
+    .newsletter-content{position:relative; z-index:2;}
+    .newsletter input{padding:14px; width:300px; border-radius:8px; border:none; margin-right:8px;}
+    @media(max-width:600px){
+      .newsletter input{width:100%; margin-bottom:12px;}
+    }
+    /* ...existing code... */
+
+/* Footer mobile layout */
+@media (max-width: 900px) {
+  .footer-content {
+    display: block;
+    padding: 32px 0;
+  }
+  .footer-content > div {
+    margin-bottom: 24px;
+  }
+  .footer-content > div:last-child {
+    margin-bottom: 0;
+  }
+  .footer h4, .footer h3 {
+    margin-bottom: 12px;
+  }
+  .footer ul {
+    gap: 6px;
+  }
+  .footer-bottom {
+    font-size: 1rem;
+    padding: 12px 0 18px;
+  }
+}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container nav-container">
+      <a href="home1.html" class="logo">
+        <img class="logo-img" src="img/cropped-image-removebg-preview-2.png" alt="Nexus Logo">
+      </a>
+      <nav class="nav" id="site-nav">
+        <ul class="nav-links">
+          <li class="dropdown">
+            <a href="home1.html" data-i18n="nav.home">Home <i class="fas fa-chevron-down"></i></a>
+            <ul class="dropdown-menu">
+              <li><a href="home1.html" data-i18n="nav.home1">Home 1</a></li>
+              <li><a href="home3.html" data-i18n="nav.home2">Home 2</a></li>
+            </ul>
+          </li>
+          <li><a href="About us.html" data-i18n="nav.about">About Us</a></li>
+          <li class="dropdown">
+            <a href="Services.html" data-i18n="nav.services">Services <i class="fas fa-chevron-down"></i></a>
+            <ul class="dropdown-menu">
+              <li><a href="Services.html" data-i18n="nav.allServices">All Services</a></li>
+             <li><a href="architectural-design.html" data-i18n="nav.architecturalDesign">Architectural Design</a></li>
+            <li><a href="construction-management.html" data-i18n="nav.constructionManagement">Construction Management</a></li>
+            <li><a href="interior-design.html" data-i18n="nav.interiorDesign">Interior Design</a></li>
+            <li><a href="structural-engineering.html" data-i18n="nav.structuralEngineering">Structural Engineering</a></li>
+            <li><a href="auditing.html" data-i18n="nav.auditing">Landscaping</a></li>
+             <li><a href="corporate finance.html" data-i18n="nav.corporateFinance">Project Planning</a></li>
+            </ul>
+          </li>
+          <li><a href="blog.html" data-i18n="nav.blog">Blog</a></li>
+          <li><a href="contact.html" data-i18n="nav.contact">Contact Us</a></li>
+          <li class="dropdown">
+            <a href="signup.html" data-i18n="nav.login">Login <i class="fas fa-chevron-down"></i></a>
+            <ul class="dropdown-menu">
+              <li><a href="login.html" data-i18n="nav.signUpLogin">Sign Up/Login</a></li>
+              <li><a href="sign admin.html" data-i18n="nav.adminLogin">Admin Login</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <div class="nav-right">
+        <div class="profile-container" style="position: relative;">
+          <button id="profile-btn" class="profile-icon">
+            <span id="initials-display"></span>
+          </button>
+          <div class="profile-menu" id="profile-dropdown">
+            <a href="login.html" id="logout-btn" data-i18n="nav.logout">Logout</a>
+          </div>
+        </div>
+        <div class="theme-toggle">
+          <button id="theme-toggle" class="btn btn-secondary">
+            <i class="fas fa-moon"></i>
+          </button>
+        </div>
+        <div class="language-selector">
+          <i class="fas fa-globe"></i>
+          <select id="language-select"></select>
+        </div>
+        <div class="mobile-menu-toggle" id="mobile-toggle">
+          <i class="fas fa-bars"></i>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero-section" data-aos="fade-up">
+    <video class="video-bg" autoplay loop muted playsinline>
+      <source src="video/3741-174188012_small.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <div class="hero-content">
+      <span class="eyebrow" data-i18n="hero.eyebrow"><i class="fa-solid fa-hard-hat"></i> Your Trusted Building Partner</span>
+      <h1 data-i18n="hero.heading">Building the Future. Creating Landmarks.</h1>
+      <p data-i18n="hero.subheading">We provide expert architectural design, construction, and management services to bring your vision to life.</p>
+      <a href="#services" class="btn btn-primary" data-i18n="hero.button"><i class="fa-solid fa-hammer"></i> Explore Services</a>
+    </div>
+  </section>
+
+  <section class="services-section" id="services" data-aos="fade-up">
+    <div class="container">
+      <h2 style="text-align:center; margin-bottom:40px;" data-i18n="services.heading">Our Core Services</h2>
+      <div class="services-grid" data-aos="fade-up" data-aos-delay="200">
+        <div class="service-card"><i class="fa-solid fa-pencil-ruler"></i><h3 data-i18n="services.architecturalDesign.heading">Architectural Design</h3><p data-i18n="services.architecturalDesign.text">Creative and functional designs that shape modern spaces.</p></div>
+        <div class="service-card"><i class="fa-solid fa-sitemap"></i><h3 data-i18n="services.constructionManagement.heading">Construction Management</h3><p data-i18n="services.constructionManagement.text">Efficient project oversight ensuring timely and on-budget delivery.</p></div>
+        <div class="service-card"><i class="fa-solid fa-couch"></i><h3 data-i18n="services.interiorDesign.heading">Interior Design</h3><p data-i18n="services.interiorDesign.text">Crafting beautiful and practical interiors for homes and offices.</p></div>
+        <div class="service-card"><i class="fa-solid fa-building-circle-check"></i><h3 data-i18n="services.structuralEngineering.heading">Structural Engineering</h3><p data-i18n="services.structuralEngineering.text">Ensuring the integrity and safety of every structure we build.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats-section" data-aos="fade-up">
+    <div class="container">
+      <h2 data-i18n="stats.heading">Why Choose Us</h2>
+      <div class="stats-grid">
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="100"><div class="stat-number" data-target="15">0</div><p data-i18n="stats.experience">Years of Experience</p></div>
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="200"><div class="stat-number" data-target="300">0</div><p data-i18n="stats.projects">Projects Completed</p></div>
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="300"><div class="stat-number" data-target="5000000">0</div><p data-i18n="stats.squareFootage">Sq. Footage Built</p></div>
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="400"><div class="stat-number" data-target="99">0</div><p data-i18n="stats.clientSatisfaction">Client Satisfaction Rate (%)</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="team-section" data-aos="fade-up">
+    <div class="container">
+      <h2 style="text-align:center; margin-bottom:40px;" data-i18n="team.heading">Meet Our Experts</h2>
+      <div class="team-grid">
+        <div class="team-card" data-aos="zoom-in" data-aos-delay="100">
+          <img src="img/d181e44cf0a7d5f9190bc96939da4164.jpg" alt="Rakesh Kumar">
+          <h3 data-i18n="team.member1.name">Rakesh Kumar</h3>
+          <p data-i18n="team.member1.title">Chartered Accountant</p>
+        </div>
+        <div class="team-card" data-aos="zoom-in" data-aos-delay="200">
+          <img src="img/0ad19309a59be71b028548801ac38353.jpg" alt="Anjali Mehta">
+          <h3 data-i18n="team.member2.name">Anjali Mehta</h3>
+          <p data-i18n="team.member2.title">Financial Planner</p>
+        </div>
+        <div class="team-card" data-aos="zoom-in" data-aos-delay="300">
+          <img src="img/7e46c6d2798eff446b365c5246f4c9ca.jpg" alt="Vivek Singh">
+          <h3 data-i18n="team.member3.name">Vivek Singh</h3>
+          <p data-i18n="team.member3.title">Investment Advisor</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="testimonials" data-aos="fade-up">
+    <div class="container">
+      <h2 data-i18n="testimonials.heading">What Our Clients Say</h2>
+      <div class="testimonial-slider">
+        <div class="testimonial" data-aos="fade-right" data-aos-delay="100">
+          <div class="stars">★★★★★</div>
+          <p data-i18n="testimonials.quote1">"Nexus turned my dream home into a reality. The process was seamless and the result stunning."</p>
+          <h4 data-i18n="testimonials.author1">- Rahul Sharma</h4>
+        </div>
+        <div class="testimonial" data-aos="fade-right" data-aos-delay="200">
+          <div class="stars">★★★★★</div>
+          <p data-i18n="testimonials.quote2">"Professional, on-time, and within budget. Our new office building is a testament to their skill."</p>
+          <h4 data-i18n="testimonials.author2">- Ayesha Khan</h4>
+        </div>
+        <div class="testimonial" data-aos="fade-right" data-aos-delay="300">
+          <div class="stars">★★★★☆</div>
+          <p data-i18n="testimonials.quote3">"The team at Nexus understood our vision perfectly. The communication was excellent throughout the project."</p>
+          <h4 data-i18n="testimonials.author3">- Sanjay Reddy</h4>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="newsletter" data-aos="zoom-in">
+    <div class="newsletter-content">
+      <h2 style="color:#fff;" data-i18n="newsletter.heading">Book a Free Consultation</h2>
+      <p style="color:#ddd;" data-i18n="newsletter.subheading">Let's discuss how we can build your next big project.</p>
+      <form onsubmit="event.preventDefault(); alert('Consultation Request Sent!')">
+        <input type="email" data-i18n-placeholder="newsletter.placeholder" placeholder="Your Email" required>
+        <button class="btn btn-primary" type="submit" data-i18n="newsletter.button">Request Callback</button>
+      </form>
+    </div>
+  </section>
+
+ <footer class="footer">
+        <div class="container footer-content">
+            <div>
+                <a href="#" class="logo">
+                    <img class="logo-img" src="img/cropped-image-removebg-preview-2.png" alt="BuildSphere Logo">
+                </a>
+                <p>Leading the way in innovative and sustainable architectural solutions.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div>
+                <h4>Explore</h4>
+                <ul>
+                    <li><a href="home1.html" data-i18n="footer.explore.about">Home</a></li>
+                    <li><a href="About us.html" data-i18n="footer.explore.services">About us</a></li>
+                    <li><a href="Services.html" data-i18n="footer.explore.projects">Services</a></li>
+                    <li><a href="Blog.html" data-i18n="footer.explore.blog">Blog</a></li>
+                    <li><a href="contact.html" data-i18n="footer.explore.contact">Contact Us</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Services</h4>
+                <ul>
+                     <li><a href="architectural-design.html" data-i18n="nav.architecturalDesign">Architectural Design</a></li>
+            <li><a href="construction-management.html" data-i18n="nav.constructionManagement">Construction Management</a></li>
+            <li><a href="interior-design.html" data-i18n="nav.interiorDesign">Interior Design</a></li>
+            <li><a href="structural-engineering.html" data-i18n="nav.structuralEngineering">Structural Engineering</a></li>
+            <li><a href="Landscaping.html" data-i18n="nav.auditing">Landscaping</a></li>
+             <li><a href="Project Planning.html" data-i18n="nav.corporateFinance">Project Planning</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Contact Info</h4>
+                <p data-i18n="footer.contact.address">123 Architecture Lane, Building 45, Design City, DC 67890</p>
+                <p data-i18n="footer.contact.email">info@Stackly.com</p>
+                <p data-i18n="footer.contact.phone">+1 (555) 123-4567</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p data-i18n="footer.copyright">  © 2025 Stackly. All rights reserved.</p>
+        </div>
+    </footer>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init();
+    // --- Scripts from home1.html for header/footer ---
+    const mobileToggle = document.getElementById('mobile-toggle');
+    const nav = document.getElementById('site-nav');
+    mobileToggle?.addEventListener('click', ()=> nav.classList.toggle('open'));
+
+    document.getElementById('theme-toggle')?.addEventListener('click', ()=>{
+      document.body.classList.toggle('light');
+    });
+
+    const profileBtn = document.getElementById('profile-btn');
+    const profileDropdown = document.getElementById('profile-dropdown');
+    const initialsDisplay = document.getElementById('initials-display');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    function updateProfileButton() {
+      const userData = JSON.parse(localStorage.getItem('userData') || "{}");
+      if (userData && userData.firstName && userData.lastName) {
+        const initials = `${userData.firstName.charAt(0)}${userData.lastName.charAt(0)}`.toUpperCase();
+        initialsDisplay.textContent = initials;
+        profileBtn.style.display = 'flex';
+      } else {
+        profileBtn.style.display = 'none';
+      }
+    }
+
+    function toggleDropdown() { profileDropdown.classList.toggle('active'); }
+    function handleLogout() {
+      localStorage.removeItem('userData'); localStorage.removeItem('isLoggedIn');
+      const messageBox = document.createElement('div');
+      messageBox.innerHTML = 'Logged out successfully! <i class="fas fa-check-circle"></i>';
+      messageBox.style.cssText = `
+        position: fixed; top: 20px; right: 20px; background-color: var(--brand); color: white;
+        padding: 15px 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,.2);
+        z-index: 9999; display: flex; align-items: center; gap: 10px; animation: fadeOut 3s forwards;
+      `;
+      document.body.appendChild(messageBox);
+      const styleSheet = document.createElement("style");
+      styleSheet.innerText = `
+        @keyframes fadeOut { 0% { opacity: 1; transform: translateY(0);} 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px);} }
+      `;
+      document.head.appendChild(styleSheet);
+      setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+    }
+
+    profileBtn?.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(); });
+    logoutBtn?.addEventListener('click', handleLogout);
+    document.addEventListener('click', (e) => {
+      if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) profileDropdown.classList.remove('active');
+    });
+    document.addEventListener('DOMContentLoaded', updateProfileButton);
+
+    document.querySelectorAll('.nav-links .dropdown > a').forEach(function(dropdownToggle) {
+      dropdownToggle.addEventListener('click', function(e) {
+        if (window.innerWidth <= 780) {
+          e.preventDefault();
+          const dropdownMenu = this.nextElementSibling;
+          if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
+            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+          }
+        }
+      });
+    });
+    window.addEventListener('resize', function() {
+      if (window.innerWidth > 780) {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => { menu.style.display = ''; });
+      }
+    });
+
+    // --- Scripts from home3.html ---
+    const counters=document.querySelectorAll('.stat-number');
+    const io=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          let el=entry.target; let target=+el.dataset.target;
+          let count=0; let step=target/100;
+          let interval=setInterval(()=>{
+            count+=step;
+            if(count>=target){ count=target; clearInterval(interval);}
+            el.textContent=Math.floor(count).toLocaleString();
+          },20);
+          io.unobserve(el);
+        }
+      });
+    });
+    counters.forEach(c=>io.observe(c));
+
+    // New JavaScript to dynamically populate the language dropdown and change content
+    const languages = {
+      'en': 'English',
+      'he': 'Hebrew',
+      'ar': 'Arabic'
+    };
+    
+    const translations = {
+      'en': {
+        'title': 'Stackly Construction - Contact',
+        'nav.home': 'Home',
+        'nav.home1': 'Home 1',
+        'nav.home2': 'Home 2',
+        'nav.about': 'About Us',
+        'nav.services': 'Services',
+        'nav.allServices': 'All Services',
+        'nav.architecturalDesign': 'Architectural Design',
+        'nav.constructionManagement': 'Construction Management',
+        'nav.interiorDesign': 'Interior Design',
+        'nav.structuralEngineering': 'Structural Engineering',
+        'nav.auditing': 'Landscaping',
+        'nav.corporateFinance': 'Project Planning',
+        'nav.blog': 'Blog',
+        'nav.contact': 'Contact Us',
+        'nav.login': 'Login',
+        'nav.signUpLogin': 'Sign Up/Login',
+        'nav.adminLogin': 'Admin Login',
+        'nav.logout': 'Logout',
+        'hero.eyebrow': 'Your Trusted Building Partner',
+        'hero.heading': 'Building the Future. Creating Landmarks.',
+        'hero.subheading': 'We provide expert architectural design, construction, and management services to bring your vision to life.',
+        'hero.button': 'Explore Services',
+        'services.heading': 'Our Core Services',
+        'services.architecturalDesign.heading': 'Architectural Design',
+        'services.architecturalDesign.text': 'Creative and functional designs that shape modern spaces.',
+        'services.constructionManagement.heading': 'Construction Management',
+        'services.constructionManagement.text': 'Efficient project oversight ensuring timely and on-budget delivery.',
+        'services.interiorDesign.heading': 'Interior Design',
+        'services.interiorDesign.text': 'Crafting beautiful and practical interiors for homes and offices.',
+        'services.structuralEngineering.heading': 'Structural Engineering',
+        'services.structuralEngineering.text': 'Ensuring the integrity and safety of every structure we build.',
+        'stats.heading': 'Why Choose Us',
+        'stats.experience': 'Years of Experience',
+        'stats.projects': 'Projects Completed',
+        'stats.squareFootage': 'Sq. Footage Built',
+        'stats.clientSatisfaction': 'Client Satisfaction Rate (%)',
+        'team.heading': 'Meet Our Experts',
+        'team.member1.name': 'Rakesh Kumar',
+        'team.member1.title': 'Chartered Accountant',
+        'team.member2.name': 'Anjali Mehta',
+        'team.member2.title': 'Financial Planner',
+        'team.member3.name': 'Vivek Singh',
+        'team.member3.title': 'Investment Advisor',
+        'testimonials.heading': 'What Our Clients Say',
+        'testimonials.quote1': '"Nexus turned my dream home into a reality. The process was seamless and the result stunning."',
+        'testimonials.author1': '- Rahul Sharma',
+        'testimonials.quote2': '"Professional, on-time, and within budget. Our new office building is a testament to their skill."',
+        'testimonials.author2': '- Ayesha Khan',
+        'testimonials.quote3': '"The team at Nexus understood our vision perfectly. The communication was excellent throughout the project."',
+        'testimonials.author3': '- Sanjay Reddy',
+        'newsletter.heading': 'Book a Free Consultation',
+        'newsletter.subheading': 'Let\'s discuss how we can build your next big project.',
+        'newsletter.placeholder': 'Your Email',
+        'newsletter.button': 'Request Callback',
+        'footer.aboutText': 'Your trusted partner in architectural design and construction. We provide specialized solutions to help your project succeed from blueprint to reality.',
+        'footer.quickLinks': 'Quick Links',
+        'footer.services': 'Services',
+        'footer.contactInfo': 'Contact Info',
+        'footer.address': '789 Skyline Blvd, Builder City, State 90123',
+        'footer.phone': '(555) 321-9876',
+        'footer.email': 'info@nexus-arc.com',
+        'footer.copyright': '© 2025 Stackly. All rights reserved.',
+      },
+      'he': {
+        'title': 'נכס אדריכלות ובנייה',
+        'nav.home': 'בית',
+        'nav.home1': 'בית 1',
+        'nav.home2': 'בית 2',
+        'nav.about': 'אודות',
+        'nav.services': 'שירותים',
+        'nav.allServices': 'כל השירותים',
+        'nav.architecturalDesign': 'תכנון אדריכלי',
+        'nav.constructionManagement': 'ניהול בנייה',
+        'nav.interiorDesign': 'עיצוב פנים',
+        'nav.structuralEngineering': 'הנדסת מבנים',
+        'nav.auditing': 'נוף',
+        'nav.corporateFinance': 'תכנון פרויקט',
+        'nav.blog': 'בלוג',
+        'nav.contact': 'צור קשר',
+        'nav.login': 'התחבר',
+        'nav.signUpLogin': 'הירשם / התחבר',
+        'nav.adminLogin': 'התחברות למנהל',
+        'nav.logout': 'התנתק',
+        'hero.eyebrow': 'שותף הבנייה המהימן שלך',
+        'hero.heading': 'בונים את העתיד. יוצרים ציוני דרך.',
+        'hero.subheading': 'אנו מספקים שירותי תכנון אדריכלי, בנייה וניהול מומחים כדי להגשים את החזון שלך.',
+        'hero.button': 'חקור שירותים',
+        'services.heading': 'השירותים העיקריים שלנו',
+        'services.architecturalDesign.heading': 'תכנון אדריכלי',
+        'services.architecturalDesign.text': 'עיצובים יצירתיים ופונקציונליים שמעצבים חללים מודרניים.',
+        'services.constructionManagement.heading': 'ניהול בנייה',
+        'services.constructionManagement.text': 'פיקוח פרויקט יעיל המבטיח אספקה בזמן ובמסגרת התקציב.',
+        'services.interiorDesign.heading': 'עיצוב פנים',
+        'services.interiorDesign.text': 'יצירת פנים יפים ופרקטיים לבתים ולמשרדים.',
+        'services.structuralEngineering.heading': 'הנדסת מבנים',
+        'services.structuralEngineering.text': 'הבטחת היושרה והבטיחות של כל מבנה שאנו בונים.',
+        'stats.heading': 'למה לבחור בנו',
+        'stats.experience': 'שנות ניסיון',
+        'stats.projects': 'פרויקטים שהושלמו',
+        'stats.squareFootage': 'שטח מרובע שנבנה',
+        'stats.clientSatisfaction': 'שיעור שביעות רצון לקוחות (%)',
+        'calculator.heading': 'אומדן עלות פרויקט',
+        'calculator.sizePlaceholder': 'שטח (מ"ר)',
+        'calculator.typePlaceholder': 'סוג פרויקט (1-5)',
+        'calculator.detailsPlaceholder': 'רמת פירוט (1-3)',
+        'calculator.button': 'הערך',
+        'team.heading': 'הכירו את המומחים שלנו',
+        'team.member1.name': 'ראקש קומאר',
+        'team.member1.title': 'רואה חשבון מוסמך',
+        'team.member2.name': 'אנג\'לי מהטה',
+        'team.member2.title': 'מתכנן פיננסי',
+        'team.member3.name': 'ויווק סינג',
+        'team.member3.title': 'יועץ השקעות',
+        'testimonials.heading': 'מה לקוחותינו אומרים',
+        'testimonials.quote1': '"נקסוס הפכו את בית חלומותיי למציאות. התהליך היה חלק והתוצאה מדהימה."',
+        'testimonials.author1': '- רחול שרמה',
+        'testimonials.quote2': '"מקצועיים, בזמן, ובמסגרת התקציב. בניין המשרדים החדש שלנו הוא עדות למיומנותם."',
+        'testimonials.author2': '- איאשה חאן',
+        'testimonials.quote3': '"הצוות בנקסוס הבין את החזון שלנו בצורה מושלמת. התקשורת הייתה מצוינת לאורך כל הפרויקט."',
+        'testimonials.author3': '- סנג\'אי רדי',
+        'newsletter.heading': 'קבע פגישת ייעוץ חינם',
+        'newsletter.subheading': 'בוא נדון כיצד אנו יכולים לבנות את הפרויקט הגדול הבא שלך.',
+        'newsletter.placeholder': 'האימייל שלך',
+        'newsletter.button': 'בקש שיחה חוזרת',
+        'footer.aboutText': 'השותף המהימן שלך בתכנון אדריכלי ובנייה. אנו מספקים פתרונות מיוחדים כדי לעזור לפרויקט שלך להצליח מהתוכנית ועד למציאות.',
+        'footer.quickLinks': 'קישורים מהירים',
+        'footer.services': 'שירותים',
+        'footer.contactInfo': 'פרטי התקשרות',
+        'footer.address': '789 סקיילין בולוורד, עיר הבונים, סטייט 90123',
+        'footer.phone': '(555) 321-9876',
+        'footer.email': 'info@Stackly.com',
+        'footer.copyright': '© 2025 נכס אדריכלות ובנייה. כל הזכויות שמורות.',
+      },
+      'ar': {
+        'title': 'نيكسوس للهندسة المعمارية والبناء',
+        'nav.home': 'الرئيسية',
+        'nav.home1': 'الرئيسية 1',
+        'nav.home2': 'الرئيسية 2',
+        'nav.about': 'من نحن',
+        'nav.services': 'الخدمات',
+        'nav.allServices': 'جميع الخدمات',
+        'nav.architecturalDesign': 'التصميم المعماري',
+        'nav.constructionManagement': 'إدارة البناء',
+        'nav.interiorDesign': 'التصميم الداخلي',
+        'nav.structuralEngineering': 'الهندسة الإنشائية',
+        'nav.auditing': 'تنسيق الحدائق',
+        'nav.corporateFinance': 'تخطيط المشروع',
+        'nav.blog': 'المدونة',
+        'nav.contact': 'اتصل بنا',
+        'nav.login': 'تسجيل الدخول',
+        'nav.signUpLogin': 'التسجيل/الدخول',
+        'nav.adminLogin': 'تسجيل دخول المسؤول',
+        'nav.logout': 'تسجيل الخروج',
+        'hero.eyebrow': 'شريكك في البناء الموثوق',
+        'hero.heading': 'بناء المستقبل. خلق المعالم.',
+        'hero.subheading': 'نحن نقدم خدمات تصميم معماري، بناء، وإدارة متخصصة لتحويل رؤيتك إلى واقع.',
+        'hero.button': 'استكشف الخدمات',
+        'services.heading': 'خدماتنا الأساسية',
+        'services.architecturalDesign.heading': 'التصميم المعماري',
+        'services.architecturalDesign.text': 'تصميمات إبداعية وعملية تشكل المساحات الحديثة.',
+        'services.constructionManagement.heading': 'إدارة البناء',
+        'services.constructionManagement.text': 'إشراف فعال على المشاريع يضمن التسليم في الوقت المحدد وفي حدود الميزانية.',
+        'services.interiorDesign.heading': 'التصميم الداخلي',
+        'services.interiorDesign.text': 'صياغة تصميمات داخلية جميلة وعملية للمنازل والمكاتب.',
+        'services.structuralEngineering.heading': 'الهندسة الإنشائية',
+        'services.structuralEngineering.text': 'ضمان سلامة وسلامة كل هيكل نبنيه.',
+        'stats.heading': 'لماذا تختارنا',
+        'stats.experience': 'سنوات من الخبرة',
+        'stats.projects': 'المشاريع المكتملة',
+        'stats.squareFootage': 'المساحة المربعة المبنية',
+        'stats.clientSatisfaction': 'معدل رضا العملاء (%)',
+        'calculator.heading': 'حاسبة تكلفة المشروع',
+        'calculator.sizePlaceholder': 'المساحة (قدم مربع)',
+        'calculator.typePlaceholder': 'نوع المشروع (1-5)',
+        'calculator.detailsPlaceholder': 'مستوى التفاصيل (1-3)',
+        'calculator.button': 'حساب',
+        'team.heading': 'تعرف على خبرائنا',
+        'team.member1.name': 'راكش كومار',
+        'team.member1.title': 'محاسب قانوني',
+        'team.member2.name': 'أنجالي مهتا',
+        'team.member2.title': 'مخطط مالي',
+        'team.member3.name': 'فيفيك سينغ',
+        'team.member3.title': 'مستشار استثمار',
+        'testimonials.heading': 'ماذا يقول عملاؤنا',
+        'testimonials.quote1': '"لقد حولت نيكسوس منزل أحلامي إلى حقيقة. كانت العملية سلسة والنتيجة مذهلة."',
+        'testimonials.author1': '- راهول شارما',
+        'testimonials.quote2': '"فريق محترف، في الوقت المحدد، وفي حدود الميزانية. مبنى مكتبنا الجديد هو دليل على مهارتهم."',
+        'testimonials.author2': '- عايشة خان',
+        'testimonials.quote3': '"فهم فريق نيكسوس رؤيتنا تمامًا. كان التواصل ممتازًا طوال المشروع."',
+        'testimonials.author3': '- سانجاي ريدي',
+        'newsletter.heading': 'احجز استشارة مجانية',
+        'newsletter.subheading': 'دعنا نناقش كيف يمكننا بناء مشروعك الكبير القادم.',
+        'newsletter.placeholder': 'بريدك الإلكتروني',
+        'newsletter.button': 'طلب معاودة الاتصال',
+        'footer.aboutText': 'شريكك الموثوق في التصميم المعماري والبناء. نحن نقدم حلولًا متخصصة لمساعدة مشروعك على النجاح من المخطط إلى الواقع.',
+        'footer.quickLinks': 'روابط سريعة',
+        'footer.services': 'الخدمات',
+        'footer.contactInfo': 'معلومات الاتصال',
+        'footer.address': '789 سكاي لاين بوليفارد، مدينة البناء، ولاية 90123',
+        'footer.phone': '(555) 321-9876',
+        'footer.email': 'info@Stackly.com',
+        'footer.copyright': '© 2025 نيكسوس للهندسة المعمارية والبناء. جميع الحقوق محفوظة.',
+      }
+    };
+
+    const languageSelect = document.getElementById('language-select');
+    const htmlElement = document.documentElement;
+    const currentLang = localStorage.getItem('lang') || 'en';
+
+    function updateContent(lang) {
+      document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.dataset.i18n;
+        if (translations[lang] && translations[lang][key]) {
+          element.textContent = translations[lang][key];
+        }
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+        const key = element.dataset.i18n-placeholder;
+        if (translations[lang] && translations[lang][key]) {
+          element.placeholder = translations[lang][key];
+        }
+      });
+      htmlElement.setAttribute('lang', lang);
+      if (lang === 'ar' || lang === 'he') {
+        htmlElement.setAttribute('dir', 'rtl');
+      } else {
+        htmlElement.removeAttribute('dir');
+      }
+      localStorage.setItem('lang', lang);
+    }
+
+    if (languageSelect) {
+      for (const [code, name] of Object.entries(languages)) {
+        const option = document.createElement('option');
+        option.value = code;
+        option.textContent = name;
+        languageSelect.appendChild(option);
+      }
+      languageSelect.value = currentLang;
+      languageSelect.addEventListener('change', (event) => {
+        updateContent(event.target.value);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateProfileButton();
+      updateContent(currentLang);
+    });
+  </script>
+</body>
+</html>

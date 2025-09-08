@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard • Stackly Finance & Accounting</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0b0d12;
+      --surface: #101522;
+      --panel: #0f1219;
+      --text: #e9eefc;
+      --muted: #9fb0d0;
+      --brand: #224DB7;
+      --brand-2: #5b8cff;
+      --accent: #00d1ff;
+      --card: #111726;
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --table-stripe: rgba(255,255,255,.03);
+    }
+    body.light {
+      --bg: #f4f6fa;
+      --surface: #ffffff;
+      --panel: #ffffff;
+      --text: #1d2c41;
+      --muted: #5e6d8a;
+      --brand: #224DB7;
+      --brand-2: #5b8cff;
+      --accent: #008cff;
+      --card: #ffffff;
+      --border: rgba(0,0,0,0.08);
+      --shadow: 0 8px 24px rgba(0,0,0,.08);
+      --table-stripe: rgba(0,0,0,.03);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: linear-gradient(180deg, var(--bg) 0%, var(--surface) 100%);
+      color: var(--text);
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* Layout */
+    .wrap { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--panel); border-right: 1px solid var(--border);
+      padding: 22px 16px; position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+    .brand img { height: 34px; width: auto; }
+    .brand h2 { font-size: 1.1rem; letter-spacing: .2px; margin: 0; }
+
+    .nav { display: grid; gap: 6px; }
+    .nav button {
+      text-align: left; border: 1px solid var(--border); background: transparent;
+      color: var(--text); padding: 10px 12px; border-radius: 10px; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background .2s ease, transform .06s;
+    }
+    .nav button:hover { background: var(--table-stripe); }
+    .nav button.active { background: linear-gradient(90deg, var(--brand), var(--brand-2)); border-color: transparent; }
+    
+    body[dir="rtl"] .sidebar { border-left: 1px solid var(--border); border-right: none; }
+    body[dir="rtl"] .nav button { text-align: right; flex-direction: row-reverse; }
+
+    /* Topbar */
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 22px; position: sticky; top: 0; z-index: 5;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+    }
+    .topbar .title { font-weight: 800; letter-spacing: .2px; }
+    .top-actions { display: flex; gap: 10px; align-items: center; }
+    .btn { border: 1px solid var(--border); background: var(--card); color: var(--text);
+           padding: 9px 12px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+    .btn.primary { background: linear-gradient(90deg, var(--brand), var(--brand-2)); border-color: transparent; }
+
+    /* Language selector */
+    .language-selector {
+        position: relative;
+        cursor: pointer;
+        padding: 5px 10px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background-color: var(--card);
+        color: var(--text);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background-color 0.3s ease;
+    }
+    .language-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background-color: var(--card);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        padding: 8px 0;
+        margin-top: 10px;
+        z-index: 1001;
+        display: none;
+    }
+    .language-dropdown.active { display: block; }
+    .language-dropdown li { list-style: none; padding: 0; }
+    .language-dropdown a {
+        padding: 8px 15px; display: block; color: var(--text); transition: background-color 0.2s ease;
+    }
+    .language-dropdown a:hover { background-color: var(--surface); }
+
+    /* Content */
+    .content { padding: 22px; }
+    .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
+    .card h3 { margin: 0 0 6px; font-size: .95rem; color: var(--muted); font-weight: 700; }
+    .card .big { font-size: 2rem; font-weight: 800; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; }
+    th { background: var(--panel); color: var(--text); position: sticky; top: 0; }
+    tr:nth-child(even) td { background: var(--table-stripe); }
+    
+    body[dir="rtl"] th, body[dir="rtl"] td { text-align: right; }
+
+    /* Forms */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .grid-1 { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    label { font-weight: 700; font-size: .9rem; color: var(--muted); }
+    input, select, textarea { width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); }
+    textarea { min-height: 110px; resize: vertical; }
+
+    .chart-box { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); }
+
+    /* Responsive */
+    @media (max-width: 1100px){ .cards{grid-template-columns: repeat(2,1fr);} }
+    @media (max-width: 720px){ .wrap{grid-template-columns: 1fr;} .sidebar{position: static; height: auto;} .cards{grid-template-columns: 1fr;} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="img/cropped-image-removebg-preview-2.png" alt="Stackly Logo"/>
+      </div>
+      <nav class="nav" id="nav">
+        <button data-target="dashboard" class="active" data-key="dashboard">🏠 Dashboard</button>
+        <button data-target="users" data-key="users">👥 Users</button>
+        <button data-target="inquiries" data-key="inquiries">📩 Inquiries</button>
+        <button data-target="analytics" data-key="analytics">📊 Analytics</button>
+        <button data-target="construction_architecture" data-key="construction_architecture_nav">🏗️ Construction & Architecture</button>
+        <button data-target="settings" data-key="settings">⚙️ Settings</button>
+      </nav>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="title" id="sectionTitle" data-key="dashboard_title">Dashboard</div>
+        <div class="top-actions">
+          <div class="language-selector">
+            <span id="current-lang">EN</span>
+            <i class="fas fa-chevron-down"></i>
+            <ul class="language-dropdown">
+              <li><a href="#" data-lang="en">English</a></li>
+              <li><a href="#" data-lang="ar">العربية</a></li>
+              <li><a href="#" data-lang="he">עִברִית</a></li>
+            </ul>
+          </div>
+          <button id="themeToggle" class="btn" data-key="toggle_theme_btn">Toggle Theme</button>
+          <button id="logoutBtn" class="btn primary" data-key="logout_btn">Logout</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <section id="dashboard" class="section active">
+          <div class="cards">
+            <div class="card"><h3 data-key="total_users">Total Users</h3><div class="big" id="statTotalUsers">0</div></div>
+            <div class="card"><h3 data-key="active_users">Active Users</h3><div class="big" id="statActiveUsers">0</div></div>
+            <div class="card"><h3 data-key="queries">Queries</h3><div class="big" id="statQueries">0</div></div>
+            <div class="card"><h3 data-key="total_logs">Total Logs</h3><div class="big" id="statLogs">0</div></div>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:16px;">
+            <div class="chart-box">
+              <h3 data-key="logins_vs_logouts">Logins vs Logouts</h3>
+              <canvas id="chartLogPie"></canvas>
+            </div>
+            <div class="chart-box">
+              <h3 data-key="records_overview">Records Overview</h3>
+              <canvas id="chartOverview"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <section id="users" class="section">
+          <div class="card" style="margin-bottom:12px;">
+            <strong data-key="registered_users">Registered Users</strong>
+          </div>
+          <div class="table-wrap">
+            <table id="usersTable">
+              <thead>
+                <tr>
+                  <th data-key="hash_symbol">#</th>
+                  <th data-key="first_name">First Name</th>
+                  <th data-key="last_name">Last Name</th>
+                  <th data-key="email">Email</th>
+                  <th data-key="status">Status</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="inquiries" class="section">
+          <div class="card" style="margin-bottom:12px;">
+            <strong data-key="contact_queries">Contact Queries</strong>
+          </div>
+          <div class="table-wrap">
+            <table id="queriesTable">
+              <thead>
+                <tr>
+                  <th data-key="hash_symbol">#</th>
+                  <th data-key="name">Name</th>
+                  <th data-key="email">Email</th>
+                  <th data-key="subject">Subject</th>
+                  <th data-key="message">Message</th>
+                  <th data-key="date">Date</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="card" style="margin-top:16px;">
+            <strong data-key="system_logs">System Logs</strong>
+            <table id="logsTable" style="margin-top:10px;">
+              <thead>
+                <tr>
+                  <th data-key="hash_symbol">#</th>
+                  <th data-key="event">Event</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="analytics" class="section">
+          <div class="cards" style="margin-bottom:16px;">
+            <div class="card"><h3 data-key="logins">Logins</h3><div class="big" id="statLogins">0</div></div>
+            <div class="card"><h3 data-key="logouts">Logouts</h3><div class="big" id="statLogouts">0</div></div>
+            <div class="card"><h3 data-key="visits">Visits</h3><div class="big" id="statVisits">0</div></div>
+            <div class="card"><h3 data-key="construction_architecture_stats">Clients</h3><div class="big" id="statClients">0</div></div>
+          </div>
+          <div class="chart-box" style="margin-bottom:16px;">
+            <h3 data-key="clients_by_service_type">Clients by Service Type</h3>
+            <canvas id="chartCases"></canvas>
+          </div>
+          <div class="chart-box">
+            <h3 data-key="top_query_subjects">Top Query Subjects</h3>
+            <canvas id="chartSubjects"></canvas>
+          </div>
+        </section>
+
+        <section id="construction_architecture" class="section">
+          <div class="card" style="margin-bottom:16px;">
+            <h3 style="margin-top:0;" data-key="add_new_construction_client">Add New Client</h3>
+            <form id="clientForm" class="grid-2">
+              <div>
+                <label for="clientName" data-key="client_name">Client Name</label>
+                <input id="clientName" required placeholder="John Doe" />
+              </div>
+              <div>
+                <label for="clientEmail" data-key="email">Email</label>
+                <input id="clientEmail" type="email" required placeholder="john@firm.com" />
+              </div>
+              <div>
+                <label for="caseType" data-key="service_type">Service Type</label>
+                <select id="caseType" required>
+                  <option value="Residential" data-key="residential">Residential</option>
+                  <option value="Commercial" data-key="commercial">Commercial</option>
+                  <option value="Industrial" data-key="industrial">Industrial</option>
+                  <option value="Interior Design" data-key="interior_design">Interior Design</option>
+                  <option value="Landscaping" data-key="landscaping">Landscaping</option>
+                  <option value="Other" data-key="other">Other</option>
+                </select>
+              </div>
+              <div class="grid-1">
+                <label for="notes" data-key="notes">Notes</label>
+                <textarea id="notes" placeholder="Brief service background..."></textarea>
+              </div>
+              <div style="grid-column: 1 / -1; display:flex; gap:10px;">
+                <button class="btn primary" type="submit" data-key="add_client_btn">Add Client</button>
+                <button class="btn" type="button" id="exportClients" data-key="export_csv_btn">Export CSV</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="table-wrap">
+            <table id="clientsTable">
+              <thead>
+                <tr>
+                  <th data-key="hash_symbol">#</th>
+                  <th data-key="name">Name</th>
+                  <th data-key="email">Email</th>
+                  <th data-key="service_type">Service Type</th>
+                  <th data-key="notes">Notes</th>
+                  <th data-key="date_added">Date Added</th>
+                  <th data-key="actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="settings" class="section">
+          <div class="card">
+            <h3 style="margin-top:0;" data-key="appearance">Appearance</h3>
+            <p data-key="current_theme_label">Current: <strong id="themeLabel">Dark</strong></p>
+            <button id="settingsThemeBtn" class="btn" data-key="toggle_dark_light_btn">Toggle Dark/Light</button>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <h3 style="margin-top:0;" data-key="session">Session</h3>
+            <button id="settingsLogoutBtn" class="btn primary" data-key="logout_btn_2">Logout</button>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ======= Helpers =======
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    function loadAll() {
+      const users = JSON.parse(localStorage.getItem('allUsers')) || [];
+      const queriesA = JSON.parse(localStorage.getItem('contactForm')) || [];
+      const queriesB = JSON.parse(localStorage.getItem('queries')) || [];
+      const queries = queriesA.length ? queriesA : queriesB;
+      const logs = JSON.parse(localStorage.getItem('logs')) || [];
+      const clients = JSON.parse(localStorage.getItem('constructionArchitectureClients')) || [];
+      return { users, queries, logs, clients };
+    }
+
+    function saveClients(list){ localStorage.setItem('constructionArchitectureClients', JSON.stringify(list)); }
+
+    function fmtDate(d){
+      try { return new Date(d).toLocaleString(); } catch(e){ return new Date().toLocaleString(); }
+    }
+
+    // ======= Theme =======
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if(savedTheme === 'light') document.body.classList.add('light');
+    updateThemeLabel();
+
+    function toggleTheme(){
+      document.body.classList.toggle('light');
+      const next = document.body.classList.contains('light') ? 'light' : 'dark';
+      localStorage.setItem('theme', next);
+      updateThemeLabel();
+    }
+    function updateThemeLabel(){ $('#themeLabel') && ($('#themeLabel').textContent = document.body.classList.contains('light') ? 'Light' : 'Dark'); }
+
+    // ======= Language Translation Logic =======
+    const translations = {
+      "dashboard": { "en": "Dashboard", "ar": "لوحة التحكم", "he": "לוח מחוונים" },
+      "users": { "en": "Users", "ar": "المستخدمون", "he": "משתמשים" },
+      "inquiries": { "en": "Inquiries", "ar": "الاستفسارات", "he": "פניות" },
+      "analytics": { "en": "Analytics", "ar": "التحليلات", "he": "ניתוח נתונים" },
+      "construction_architecture_nav": { "en": "Construction & Architecture", "ar": "البناء والهندسة المعمارية", "he": "בנייה ואדריכלות" },
+      "settings": { "en": "Settings", "ar": "الإعدادات", "he": "הגדרות" },
+      "dashboard_title": { "en": "Dashboard", "ar": "لوحة التحكم", "he": "לוח מחוונים" },
+      "toggle_theme_btn": { "en": "Toggle Theme", "ar": "تبديل المظهر", "he": "החלף ערכת נושא" },
+      "logout_btn": { "en": "Logout", "ar": "تسجيل الخروج", "he": "התנתק" },
+      "total_users": { "en": "Total Users", "ar": "إجمالي المستخدمين", "he": "סה\"כ משתמשים" },
+      "active_users": { "en": "Active Users", "ar": "المستخدمون النشطون", "he": "משתמשים פעילים" },
+      "queries": { "en": "Queries", "ar": "الاستعلامات", "he": "שאילתות" },
+      "total_logs": { "en": "Total Logs", "ar": "إجمالي السجلات", "he": "סה\"כ יומנים" },
+      "logins_vs_logouts": { "en": "Logins vs Logouts", "ar": "تسجيلات الدخول مقابل تسجيلات الخروج", "he": "כניסות מול יציאות" },
+      "records_overview": { "en": "Records Overview", "ar": "نظرة عامة على السجلات", "he": "סקירת רשומות" },
+      "registered_users": { "en": "Registered Users", "ar": "المستخدمون المسجلون", "he": "משתמשים רשומים" },
+      "hash_symbol": { "en": "#", "ar": "#", "he": "#" },
+      "first_name": { "en": "First Name", "ar": "الاسم الأول", "he": "שם פרטי" },
+      "last_name": { "en": "Last Name", "ar": "الاسم الأخير", "he": "שם משפחה" },
+      "email": { "en": "Email", "ar": "البريد الإلكتروني", "he": "אימייל" },
+      "status": { "en": "Status", "ar": "الحالة", "he": "סטטוס" },
+      "contact_queries": { "en": "Contact Queries", "ar": "استفسارات الاتصال", "he": "פניות" },
+      "name": { "en": "Name", "ar": "الاسم", "he": "שם" },
+      "subject": { "en": "Subject", "ar": "الموضوع", "he": "נושא" },
+      "message": { "en": "Message", "ar": "الرسالة", "he": "הודעה" },
+      "date": { "en": "Date", "ar": "التاريخ", "he": "תאריך" },
+      "system_logs": { "en": "System Logs", "ar": "سجلات النظام", "he": "יומני מערכת" },
+      "event": { "en": "Event", "ar": "الحدث", "he": "אירוע" },
+      "logins": { "en": "Logins", "ar": "تسجيلات الدخول", "he": "כניסות" },
+      "logouts": { "en": "Logouts", "ar": "تسجيلات الخروج", "he": "יציאות" },
+      "visits": { "en": "Visits", "ar": "الزيارات", "he": "ביקורים" },
+      "construction_architecture_stats": { "en": "Construction & Architecture Clients", "ar": "عملاء البناء والهندسة المعمارية", "he": "לקוחות בנייה ואדריכלות" },
+      "clients_by_service_type": { "en": "Clients by Service Type", "ar": "العملاء حسب نوع الخدمة", "he": "לקוחות לפי סוג שירות" },
+      "top_query_subjects": { "en": "Top Query Subjects", "ar": "أهم مواضيع الاستعلام", "he": "נושאי השאילתות המובילים" },
+      "add_new_construction_client": { "en": "Add New Construction & Architecture Client", "ar": "إضافة عميل جديد للبناء والهندسة المعمارية", "he": "הוסף לקוח בנייה ואדריכלות חדש" },
+      "client_name": { "en": "Client Name", "ar": "اسم العميل", "he": "שם הלקוח" },
+      "service_type": { "en": "Service Type", "ar": "نوع الخدمة", "he": "סוג שירות" },
+      "notes": { "en": "Notes", "ar": "ملاحظات", "he": "הערות" },
+      "residential": { "en": "Residential", "ar": "سكني", "he": "מגורים" },
+      "commercial": { "en": "Commercial", "ar": "تجاري", "he": "מסחרי" },
+      "industrial": { "en": "Industrial", "ar": "صناعي", "he": "תעשייתי" },
+      "interior_design": { "en": "Interior Design", "ar": "تصميم داخلي", "he": "עיצוב פנים" },
+      "landscaping": { "en": "Landscaping", "ar": "تنسيق حدائق", "he": "גינון" },
+      "other": { "en": "Other", "ar": "أخرى", "he": "אחר" },
+      "add_client_btn": { "en": "Add Client", "ar": "إضافة عميل", "he": "הוסף לקוח" },
+      "export_csv_btn": { "en": "Export CSV", "ar": "تصدير CSV", "he": "ייצא CSV" },
+      "date_added": { "en": "Date Added", "ar": "تاريخ الإضافة", "he": "תאריך הוספה" },
+      "actions": { "en": "Actions", "ar": "الإجراءات", "he": "פעולות" },
+      "appearance": { "en": "Appearance", "ar": "المظهر", "he": "מראה" },
+      "current_theme_label": { "en": "Current:", "ar": "الحالي:", "he": "נוכחי:" },
+      "toggle_dark_light_btn": { "en": "Toggle Dark/Light", "ar": "تبديل داكن/فاتح", "he": "החלף כהה/בהיר" },
+      "session": { "en": "Session", "ar": "الجلسة", "he": "הפעלה" },
+      "logout_btn_2": { "en": "Logout", "ar": "تسجيل الخروج", "he": "התנתק" },
+      "john_doe_placeholder": { "en": "John Doe", "ar": "جون دو", "he": "ג'ון דו" },
+      "john_firm_placeholder": { "en": "john@firm.com", "ar": "john@firm.com", "he": "john@firm.com" },
+      "notes_placeholder": { "en": "Brief service background...", "ar": "خلفية موجزة عن الخدمة...", "he": "רקע קצר על השירות..." }
+    };
+
+    function setLanguage(lang) {
+        document.body.dir = (lang === 'ar' || lang === 'he') ? 'rtl' : 'ltr';
+        document.getElementById('current-lang').textContent = lang.toUpperCase();
+
+        const elements = document.querySelectorAll('[data-key]');
+        elements.forEach(el => {
+            const key = el.getAttribute('data-key');
+            if (translations[key] && translations[key][lang]) {
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                    if (el.placeholder) {
+                        el.placeholder = translations[key][lang];
+                    }
+                } else if (el.tagName === 'BUTTON' || el.tagName === 'H3' || el.tagName === 'STRONG' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'DIV' || el.tagName === 'TH' || el.tagName === 'P') {
+                    el.textContent = translations[key][lang];
+                } else {
+                    el.textContent = translations[key][lang];
+                }
+            }
+        });
+        
+        // Handle specific placeholder texts
+        document.getElementById('clientName').placeholder = translations.john_doe_placeholder[lang];
+        document.getElementById('clientEmail').placeholder = translations.john_firm_placeholder[lang];
+        document.getElementById('notes').placeholder = translations.notes_placeholder[lang];
+    }
+    
+    const langSelector = document.querySelector('.language-selector');
+    const langDropdown = document.querySelector('.language-dropdown');
+
+    if (langSelector) {
+        langSelector.addEventListener('click', (e) => {
+            e.stopPropagation();
+            langDropdown.classList.toggle('active');
+        });
+    }
+
+    if (langDropdown) {
+        langDropdown.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                e.preventDefault();
+                const newLang = e.target.getAttribute('data-lang');
+                setLanguage(newLang);
+                langDropdown.classList.remove('active');
+            }
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (langSelector && !langSelector.contains(e.target) && langDropdown.classList.contains('active')) {
+            langDropdown.classList.remove('active');
+        }
+    });
+
+    // Set default language on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        setLanguage('en');
+    });
+
+    // ======= Navigation =======
+    $$('#nav button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        $$('#nav button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const id = btn.dataset.target;
+        $$('.section').forEach(s => s.classList.remove('active'));
+        $('#' + id).classList.add('active');
+        const key = btn.dataset.key;
+        const currentLang = document.getElementById('current-lang').textContent.toLowerCase();
+        $('#sectionTitle').textContent = translations[key][currentLang];
+      });
+    });
+
+    // ======= Logout =======
+    function doLogout(){
+      const logs = JSON.parse(localStorage.getItem('logs')) || [];
+      logs.push(`Admin logged out • ${new Date().toLocaleString()}`);
+      localStorage.setItem('logs', JSON.stringify(logs));
+
+      localStorage.setItem('isLoggedIn', 'false');
+      window.location.href = 'index.html';
+    }
+    $('#logoutBtn').addEventListener('click', doLogout);
+    $('#settingsLogoutBtn').addEventListener('click', doLogout);
+
+    // Theme buttons
+    $('#themeToggle').addEventListener('click', toggleTheme);
+    $('#settingsThemeBtn').addEventListener('click', toggleTheme);
+
+    // ======= Renderers =======
+    let chartLogPie, chartOverview, chartCases, chartSubjects;
+
+    function renderStats(){
+      const {users, queries, logs, clients} = loadAll();
+      const activeUsers = users.filter(u => (u.status || '').toLowerCase() === 'active').length;
+      $('#statTotalUsers').textContent = users.length;
+      $('#statActiveUsers').textContent = activeUsers;
+      $('#statQueries').textContent = queries.length;
+      $('#statLogs').textContent = logs.length;
+
+      // analytics stats
+      const loginCount = logs.filter(x => /logged in/i.test(x)).length;
+      const logoutCount = logs.filter(x => /logged out/i.test(x)).length;
+      const visitCount = logs.filter(x => /visit|visited|pageview/i.test(x)).length;
+      $('#statLogins').textContent = loginCount;
+      $('#statLogouts').textContent = logoutCount;
+      $('#statVisits').textContent = visitCount;
+      $('#statClients').textContent = clients.length;
+
+      // Charts
+      const ctxPie = $('#chartLogPie').getContext('2d');
+      const ctxOverview = $('#chartOverview').getContext('2d');
+      if(chartLogPie) chartLogPie.destroy();
+      if(chartOverview) chartOverview.destroy();
+      chartLogPie = new Chart(ctxPie, {
+        type: 'pie',
+        data: { labels:['Logins','Logouts'], datasets:[{ data:[loginCount, logoutCount] }] },
+        options: { plugins:{ legend:{ position:'bottom' } } }
+      });
+      chartOverview = new Chart(ctxOverview, {
+        type: 'doughnut',
+        data: { labels:['Users','Queries','Clients','Logs'], datasets:[{ data:[users.length, queries.length, clients.length, logs.length] }] },
+        options: { plugins:{ legend:{ position:'bottom' } } }
+      });
+    }
+
+    function renderUsers(){
+      const {users} = loadAll();
+      const tbody = $('#usersTable tbody');
+      tbody.innerHTML = '';
+      users.forEach((u,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${i+1}</td><td>${u.firstName||''}</td><td>${u.lastName||''}</td><td>${u.email||''}</td><td>${u.status||''}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderQueries(){
+      const {queries, logs} = loadAll();
+      const qbody = $('#queriesTable tbody');
+      qbody.innerHTML = '';
+      queries.forEach((q,i)=>{
+        const date = q.date || q.timestamp || new Date().toISOString();
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${i+1}</td><td>${q.name||''}</td><td>${q.email||''}</td><td>${q.subject||''}</td><td>${q.message||''}</td><td>${fmtDate(date)}</td>`;
+        qbody.appendChild(tr);
+      });
+
+      const lbody = $('#logsTable tbody');
+      lbody.innerHTML = '';
+      logs.forEach((log,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${i+1}</td><td>${log}</td>`;
+        lbody.appendChild(tr);
+      });
+    }
+
+    function renderClients(){
+      const {clients} = loadAll();
+      const tbody = $('#clientsTable tbody');
+      tbody.innerHTML = '';
+      clients.forEach((c,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${i+1}</td>
+          <td>${c.name}</td>
+          <td>${c.email}</td>
+          <td>${c.caseType}</td>
+          <td>${(c.notes||'').slice(0,120)}</td>
+          <td>${fmtDate(c.date)}</td>
+          <td>
+            <button class="btn" data-del="${c.id}">Delete</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+
+      // delete handlers
+      $$('#clientsTable [data-del]').forEach(btn=>{
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-del');
+          let list = JSON.parse(localStorage.getItem('constructionArchitectureClients')) || [];
+          list = list.filter(x => String(x.id) !== String(id));
+          saveClients(list);
+          renderEverything();
+        });
+      });
+    }
+
+    function renderAnalyticsCharts(){
+      const {clients, queries} = loadAll();
+
+      // Case type distribution
+      const caseCount = {};
+      clients.forEach(c => { caseCount[c.caseType] = (caseCount[c.caseType]||0)+1; });
+      const caseLabels = Object.keys(caseCount);
+      const caseValues = Object.values(caseCount);
+
+      const ctxCases = $('#chartCases').getContext('2d');
+      if(chartCases) chartCases.destroy();
+      chartCases = new Chart(ctxCases, {
+        type: 'bar',
+        data: { labels: caseLabels, datasets: [{ label: 'Clients', data: caseValues }] },
+        options: { plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, precision:0 } } }
+      });
+
+      // Top subjects from queries
+      const subjCount = {};
+      queries.forEach(q => { const s = (q.subject||'General').trim() || 'General'; subjCount[s] = (subjCount[s]||0)+1; });
+      const topEntries = Object.entries(subjCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
+      const subjLabels = topEntries.map(e=>e[0]);
+      const subjValues = topEntries.map(e=>e[1]);
+
+      const ctxSubjects = $('#chartSubjects').getContext('2d');
+      if(chartSubjects) chartSubjects.destroy();
+      chartSubjects = new Chart(ctxSubjects, {
+        type: 'bar',
+        data: { labels: subjLabels, datasets: [{ label: 'Queries', data: subjValues }] },
+        options: { plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, precision:0 } } }
+      });
+    }
+
+    function renderEverything(){
+      renderStats();
+      renderUsers();
+      renderQueries();
+      renderClients();
+      renderAnalyticsCharts();
+    }
+
+    // ======= Client Form Handlers =======
+    $('#clientForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const name = $('#clientName').value.trim();
+      const email = $('#clientEmail').value.trim();
+      const caseType = $('#caseType').value;
+      const notes = $('#notes').value.trim();
+      let list = JSON.parse(localStorage.getItem('constructionArchitectureClients')) || [];
+      list.push({ id: Date.now(), name, email, caseType, notes, date: new Date().toISOString() });
+      saveClients(list);
+
+      // Optional: add a log entry
+      const logs = JSON.parse(localStorage.getItem('logs')) || [];
+      logs.push(`Client added (${caseType}) • ${name} • ${new Date().toLocaleString()}`);
+      localStorage.setItem('logs', JSON.stringify(logs));
+
+      // reset
+      e.target.reset();
+      renderEverything();
+      alert('Client saved');
+    });
+
+    // Export CSV
+    $('#exportClients').addEventListener('click', ()=>{
+      const {clients} = loadAll();
+      if(!clients.length) return alert('No clients to export');
+      const headers = ['Name','Email','Service Type','Notes','Date'];
+      const rows = clients.map(c => [c.name, c.email, c.caseType, (c.notes||'').replace(/\n/g,' '), fmtDate(c.date)]);
+      const csv = [headers.join(','), ...rows.map(r=> r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
+      const blob = new Blob([csv], {type:'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'clients.csv'; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // ======= Init =======
+    renderEverything();
+
+  </script>
+
+</body>
+</html>
