@@ -3,35 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard • Stackly Finance & Accounting</title>
+  <title>Admin Dashboard • BuildStack Construction & Architecture</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root {
-      --bg: #0b0d12;
-      --surface: #101522;
-      --panel: #0f1219;
-      --text: #e9eefc;
-      --muted: #9fb0d0;
-      --brand: #224DB7;
-      --brand-2: #5b8cff;
-      --accent: #00d1ff;
-      --card: #111726;
-      --border: rgba(255,255,255,0.08);
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-      --table-stripe: rgba(255,255,255,.03);
-    }
+   :root {
+  --bg: #0b0d12;
+  --surface: #101522;
+  --panel: #0f1219;
+  --text: #e9eefc;
+  --muted: #c4d2e8;
+  --brand: #e67e22; /* Changed for construction theme (orange) */
+  --brand-2: #f39c12; /* Changed for construction theme (amber) */
+  --accent: #00d1ff;
+  --card: #111726;
+  --border: rgba(255,255,255,0.08);
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+  --table-stripe: rgba(255,255,255,.03);
+}
     body.light {
       --bg: #f4f6fa;
       --surface: #ffffff;
       --panel: #ffffff;
       --text: #1d2c41;
       --muted: #5e6d8a;
-      --brand: #224DB7;
-      --brand-2: #5b8cff;
-      --accent: #008cff;
+      --brand: #e67e22;
+      --brand-2: #f39c12;
+      --accent: #2c3e50;
       --card: #ffffff;
       --border: rgba(0,0,0,0.08);
       --shadow: 0 8px 24px rgba(0,0,0,.08);
@@ -51,21 +52,83 @@
 
     /* Sidebar */
     .sidebar {
-      background: var(--panel); border-right: 1px solid var(--border);
-      padding: 22px 16px; position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      padding: 22px 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
     }
-    .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
-    .brand img { height: 34px; width: auto; }
-    .brand h2 { font-size: 1.1rem; letter-spacing: .2px; margin: 0; }
 
-    .nav { display: grid; gap: 6px; }
-    .nav button {
-      text-align: left; border: 1px solid var(--border); background: transparent;
-      color: var(--text); padding: 10px 12px; border-radius: 10px; font-weight: 600;
-      cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background .2s ease, transform .06s;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
     }
-    .nav button:hover { background: var(--table-stripe); }
-    .nav button.active { background: linear-gradient(90deg, var(--brand), var(--brand-2)); border-color: transparent; }
+
+    .brand img {
+      height: 34px;
+      width: auto;
+    }
+
+    .brand h2 {
+      font-size: 1.1rem;
+      letter-spacing: .2px;
+      margin: 0;
+    }
+
+    .nav {
+      display: grid;
+      gap: 6px;
+    }
+
+    .nav button {
+      text-align: left;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background .2s ease, transform .06s;
+      position: relative;
+    }
+
+    .nav button:hover {
+      background: rgba(218, 108, 13, 0.1); /* Use new brand color */
+    }
+
+    .nav button.active {
+      background: rgba(230, 126, 34, 0.1);
+      color: black;
+      border-color: rgba(230, 126, 34, 0.3);
+    }
+
+    .nav button.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 80%;
+      background-color: var(--brand);
+      border-radius: 0 4px 4px 0;
+    }
+
+  .nav button.active {
+  background: rgba(230, 126, 34, 0.15);
+  color: var(--text); /* ✅ adapts automatically to theme */
+  border-color: rgba(230, 126, 34, 0.4);
+}
+
+
     
     body[dir="rtl"] .sidebar { border-left: 1px solid var(--border); border-right: none; }
     body[dir="rtl"] .nav button { text-align: right; flex-direction: row-reverse; }
@@ -80,7 +143,9 @@
     .top-actions { display: flex; gap: 10px; align-items: center; }
     .btn { border: 1px solid var(--border); background: var(--card); color: var(--text);
            padding: 9px 12px; border-radius: 10px; font-weight: 700; cursor: pointer; }
-    .btn.primary { background: linear-gradient(90deg, var(--brand), var(--brand-2)); border-color: transparent; }
+    .btn.primary { background: linear-gradient(90deg, var(--brand), var(--brand-2)); border-color: transparent; color: white;}
+    .menu-toggle { display: none; }
+    body.light .btn.primary { color: white; }
 
     /* Language selector */
     .language-selector {
@@ -119,6 +184,7 @@
     /* Content */
     .content { padding: 22px; }
     .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
     .card h3 { margin: 0 0 6px; font-size: .95rem; color: var(--muted); font-weight: 700; }
     .card .big { font-size: 2rem; font-weight: 800; }
@@ -127,9 +193,28 @@
     .section.active { display: block; }
 
     /* Tables */
-    table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-    th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; }
-    th { background: var(--panel); color: var(--text); position: sticky; top: 0; }
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      table-layout: fixed;
+    }
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      word-wrap: break-word;
+    }
+    th {
+      background: var(--panel);
+      color: var(--text);
+      position: sticky;
+      top: 0;
+    }
     tr:nth-child(even) td { background: var(--table-stripe); }
     
     body[dir="rtl"] th, body[dir="rtl"] td { text-align: right; }
@@ -138,34 +223,206 @@
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .grid-1 { display: grid; grid-template-columns: 1fr; gap: 14px; }
     label { font-weight: 700; font-size: .9rem; color: var(--muted); }
-    input, select, textarea { width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); }
+    input, select, textarea { 
+      width: 100%; 
+      padding: 11px 12px; 
+      border: 1px solid var(--border); 
+      border-radius: 10px; 
+      background: var(--surface); 
+      color: var(--text); 
+      transition: border-color .2s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--brand-2);
+    }
     textarea { min-height: 110px; resize: vertical; }
 
-    .chart-box { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); }
+    /* Chart design changes */
+    .chart-box { 
+      background: var(--card); 
+      border: 1px solid var(--border); 
+      border-radius: 14px; 
+      padding: 16px; 
+      box-shadow: var(--shadow); 
+      height: 300px;
+      width: 100%;
+    }
+    .chart-box canvas {
+      height: 100% !important;
+      width: 100% !important;
+    }
 
     /* Responsive */
-    @media (max-width: 1100px){ .cards{grid-template-columns: repeat(2,1fr);} }
-    @media (max-width: 720px){ .wrap{grid-template-columns: 1fr;} .sidebar{position: static; height: auto;} .cards{grid-template-columns: 1fr;} }
+    @media (max-width: 1100px){
+      .cards { grid-template-columns: repeat(2, 1fr); }
+      @media (min-width: 769px) and (max-width: 1100px) {
+        .chart-grid {
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+        }
+      }
+    }
+    @media (max-width: 768px){
+      body {
+        overflow-x: hidden;
+      }
+      .wrap { grid-template-columns: 1fr; }
+      .sidebar {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        bottom: 0;
+        width: 260px;
+        z-index: 1000;
+        transition: left 0.3s ease-in-out;
+      }
+      .sidebar.active {
+        left: 0;
+      }
+      .menu-toggle {
+        display: block;
+        background: none;
+        border: none;
+        color: var(--text);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+      }
+      .topbar {
+        padding: 12px 20px;
+      }
+      .top-actions {
+        gap: 5px;
+        flex-wrap: wrap;
+      }
+      .content {
+        padding: 16px;
+        max-width: 100%;
+      }
+      .card {
+        max-width: 100%;
+      }
+      .cards {
+        grid-template-columns: 1fr;
+      }
+      .chart-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .grid-1 {
+        grid-template-columns: 1fr;
+      }
+      .chart-box {
+        height: 250px;
+      }
+      .topbar .title {
+        font-size: 1.2rem;
+      }
+      .wrap.mobile-view .content .section {
+        display: none;
+      }
+      .wrap.mobile-view .content .section.active {
+        display: block;
+      }
+    }
+    @media (max-width: 768px){
+      body {
+        overflow-x: hidden;
+      }
+      .wrap { grid-template-columns: 1fr; }
+      .sidebar {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        bottom: 0;
+        width: 260px;
+        z-index: 1000;
+        transition: left 0.3s ease-in-out;
+      }
+      .sidebar.active {
+        left: 0;
+      }
+      .menu-toggle {
+        display: block;
+        background: none;
+        border: none;
+        color: var(--text);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+      }
+      .topbar {
+        padding: 12px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .top-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: nowrap;
+        align-items: center;
+      }
+      .content {
+        padding: 16px;
+        max-width: 100%;
+      }
+      .card {
+        max-width: 100%;
+      }
+      .cards {
+        grid-template-columns: 1fr;
+      }
+      .chart-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .grid-1 {
+        grid-template-columns: 1fr;
+      }
+      .chart-box {
+        height: 250px;
+      }
+      .topbar .title {
+        font-size: 1.2rem;
+        margin-right: auto;
+        padding-left: 10px;
+      }
+      .wrap.mobile-view .content .section {
+        display: none;
+      }
+      .wrap.mobile-view .content .section.active {
+        display: block;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <aside class="sidebar">
       <div class="brand">
-        <img src="img/cropped-image-removebg-preview-2.png" alt="Stackly Logo"/>
+        <img src="img/cropped-image-removebg-preview-2.png" alt="BuildStack Logo"/>
       </div>
       <nav class="nav" id="nav">
         <button data-target="dashboard" class="active" data-key="dashboard">🏠 Dashboard</button>
         <button data-target="users" data-key="users">👥 Users</button>
         <button data-target="inquiries" data-key="inquiries">📩 Inquiries</button>
         <button data-target="analytics" data-key="analytics">📊 Analytics</button>
-        <button data-target="construction_architecture" data-key="construction_architecture_nav">🏗️ Construction & Architecture</button>
+        <button data-target="projects" data-key="projects">🏗️ Projects</button>
         <button data-target="settings" data-key="settings">⚙️ Settings</button>
       </nav>
     </aside>
 
     <main>
       <div class="topbar">
+        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
         <div class="title" id="sectionTitle" data-key="dashboard_title">Dashboard</div>
         <div class="top-actions">
           <div class="language-selector">
@@ -190,7 +447,7 @@
             <div class="card"><h3 data-key="queries">Queries</h3><div class="big" id="statQueries">0</div></div>
             <div class="card"><h3 data-key="total_logs">Total Logs</h3><div class="big" id="statLogs">0</div></div>
           </div>
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:16px;">
+          <div class="chart-grid">
             <div class="chart-box">
               <h3 data-key="logins_vs_logouts">Logins vs Logouts</h3>
               <canvas id="chartLogPie"></canvas>
@@ -244,15 +501,17 @@
 
           <div class="card" style="margin-top:16px;">
             <strong data-key="system_logs">System Logs</strong>
-            <table id="logsTable" style="margin-top:10px;">
-              <thead>
-                <tr>
-                  <th data-key="hash_symbol">#</th>
-                  <th data-key="event">Event</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
+            <div class="table-wrap">
+                <table id="logsTable" style="margin-top:10px;">
+                    <thead>
+                        <tr>
+                            <th data-key="hash_symbol">#</th>
+                            <th data-key="event">Event</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
           </div>
         </section>
 
@@ -261,47 +520,50 @@
             <div class="card"><h3 data-key="logins">Logins</h3><div class="big" id="statLogins">0</div></div>
             <div class="card"><h3 data-key="logouts">Logouts</h3><div class="big" id="statLogouts">0</div></div>
             <div class="card"><h3 data-key="visits">Visits</h3><div class="big" id="statVisits">0</div></div>
-            <div class="card"><h3 data-key="construction_architecture_stats">Clients</h3><div class="big" id="statClients">0</div></div>
+            <div class="card"><h3 data-key="projects">Projects</h3><div class="big" id="statClients">0</div></div>
           </div>
-          <div class="chart-box" style="margin-bottom:16px;">
-            <h3 data-key="clients_by_service_type">Clients by Service Type</h3>
-            <canvas id="chartCases"></canvas>
-          </div>
-          <div class="chart-box">
-            <h3 data-key="top_query_subjects">Top Query Subjects</h3>
-            <canvas id="chartSubjects"></canvas>
+          <div class="chart-grid">
+            <div class="chart-box">
+              <h3 data-key="projects_by_type">Projects by Type</h3>
+              <canvas id="chartCases"></canvas>
+            </div>
+            <div class="chart-box">
+              <h3 data-key="top_query_subjects">Top Query Subjects</h3>
+              <canvas id="chartSubjects"></canvas>
+            </div>
           </div>
         </section>
 
-        <section id="construction_architecture" class="section">
+        <section id="projects" class="section">
           <div class="card" style="margin-bottom:16px;">
-            <h3 style="margin-top:0;" data-key="add_new_construction_client">Add New Client</h3>
+            <h3 style="margin-top:0;" data-key="add_new_project">Add New Project</h3>
             <form id="clientForm" class="grid-2">
               <div>
-                <label for="clientName" data-key="client_name">Client Name</label>
-                <input id="clientName" required placeholder="John Doe" />
+                <label for="clientName" data-key="project_name">Project Name</label>
+                <input id="clientName" required placeholder="Skyscraper Tower" />
               </div>
               <div>
-                <label for="clientEmail" data-key="email">Email</label>
-                <input id="clientEmail" type="email" required placeholder="john@firm.com" />
+                <label for="clientEmail" data-key="project_manager_email">Project Manager Email</label>
+                <input id="clientEmail" type="email" required placeholder="manager@buildstack.com" />
               </div>
               <div>
-                <label for="caseType" data-key="service_type">Service Type</label>
+                <label for="caseType" data-key="project_type">Project Type</label>
                 <select id="caseType" required>
                   <option value="Residential" data-key="residential">Residential</option>
                   <option value="Commercial" data-key="commercial">Commercial</option>
                   <option value="Industrial" data-key="industrial">Industrial</option>
-                  <option value="Interior Design" data-key="interior_design">Interior Design</option>
-                  <option value="Landscaping" data-key="landscaping">Landscaping</option>
+                  <option value="Infrastructure" data-key="infrastructure">Infrastructure</option>
+                  <option value="Renovation" data-key="renovation">Renovation</option>
+                  <option value="InteriorDesign" data-key="interior_design">Interior Design</option>
                   <option value="Other" data-key="other">Other</option>
                 </select>
               </div>
               <div class="grid-1">
                 <label for="notes" data-key="notes">Notes</label>
-                <textarea id="notes" placeholder="Brief service background..."></textarea>
+                <textarea id="notes" placeholder="Brief project background..."></textarea>
               </div>
               <div style="grid-column: 1 / -1; display:flex; gap:10px;">
-                <button class="btn primary" type="submit" data-key="add_client_btn">Add Client</button>
+                <button class="btn primary" type="submit" data-key="add_project_btn">Add Project</button>
                 <button class="btn" type="button" id="exportClients" data-key="export_csv_btn">Export CSV</button>
               </div>
             </form>
@@ -312,9 +574,9 @@
               <thead>
                 <tr>
                   <th data-key="hash_symbol">#</th>
-                  <th data-key="name">Name</th>
-                  <th data-key="email">Email</th>
-                  <th data-key="service_type">Service Type</th>
+                  <th data-key="name">Project Name</th>
+                  <th data-key="email">Manager Email</th>
+                  <th data-key="project_type">Project Type</th>
                   <th data-key="notes">Notes</th>
                   <th data-key="date_added">Date Added</th>
                   <th data-key="actions">Actions</th>
@@ -352,11 +614,11 @@
       const queriesB = JSON.parse(localStorage.getItem('queries')) || [];
       const queries = queriesA.length ? queriesA : queriesB;
       const logs = JSON.parse(localStorage.getItem('logs')) || [];
-      const clients = JSON.parse(localStorage.getItem('constructionArchitectureClients')) || [];
+      const clients = JSON.parse(localStorage.getItem('buildStackProjects')) || []; // Updated key
       return { users, queries, logs, clients };
     }
 
-    function saveClients(list){ localStorage.setItem('constructionArchitectureClients', JSON.stringify(list)); }
+    function saveClients(list){ localStorage.setItem('buildStackProjects', JSON.stringify(list)); } // Updated key
 
     function fmtDate(d){
       try { return new Date(d).toLocaleString(); } catch(e){ return new Date().toLocaleString(); }
@@ -372,6 +634,8 @@
       const next = document.body.classList.contains('light') ? 'light' : 'dark';
       localStorage.setItem('theme', next);
       updateThemeLabel();
+      // Re-render charts to apply new theme colors
+      renderEverything();
     }
     function updateThemeLabel(){ $('#themeLabel') && ($('#themeLabel').textContent = document.body.classList.contains('light') ? 'Light' : 'Dark'); }
 
@@ -381,7 +645,7 @@
       "users": { "en": "Users", "ar": "المستخدمون", "he": "משתמשים" },
       "inquiries": { "en": "Inquiries", "ar": "الاستفسارات", "he": "פניות" },
       "analytics": { "en": "Analytics", "ar": "التحليلات", "he": "ניתוח נתונים" },
-      "construction_architecture_nav": { "en": "Construction & Architecture", "ar": "البناء والهندسة المعمارية", "he": "בנייה ואדריכלות" },
+      "projects": { "en": "Projects", "ar": "المشاريع", "he": "פרויקטים" },
       "settings": { "en": "Settings", "ar": "الإعدادات", "he": "הגדרות" },
       "dashboard_title": { "en": "Dashboard", "ar": "لوحة التحكم", "he": "לוח מחוונים" },
       "toggle_theme_btn": { "en": "Toggle Theme", "ar": "تبديل المظهر", "he": "החלף ערכת נושא" },
@@ -408,20 +672,22 @@
       "logins": { "en": "Logins", "ar": "تسجيلات الدخول", "he": "כניסות" },
       "logouts": { "en": "Logouts", "ar": "تسجيلات الخروج", "he": "יציאות" },
       "visits": { "en": "Visits", "ar": "الزيارات", "he": "ביקורים" },
-      "construction_architecture_stats": { "en": "Construction & Architecture Clients", "ar": "عملاء البناء والهندسة المعمارية", "he": "לקוחות בנייה ואדריכלות" },
-      "clients_by_service_type": { "en": "Clients by Service Type", "ar": "العملاء حسب نوع الخدمة", "he": "לקוחות לפי סוג שירות" },
+      "projects": { "en": "Projects", "ar": "المشاريع", "he": "פרויקטים" },
+      "projects_by_type": { "en": "Projects by Type", "ar": "المشاريع حسب النوع", "he": "פרויקטים לפי סוג" },
       "top_query_subjects": { "en": "Top Query Subjects", "ar": "أهم مواضيع الاستعلام", "he": "נושאי השאילתות המובילים" },
-      "add_new_construction_client": { "en": "Add New Construction & Architecture Client", "ar": "إضافة عميل جديد للبناء والهندسة المعمارية", "he": "הוסף לקוח בנייה ואדריכלות חדש" },
-      "client_name": { "en": "Client Name", "ar": "اسم العميل", "he": "שם הלקוח" },
-      "service_type": { "en": "Service Type", "ar": "نوع الخدمة", "he": "סוג שירות" },
+      "add_new_project": { "en": "Add New Project", "ar": "إضافة مشروع جديد", "he": "הוסף פרויקט חדש" },
+      "project_name": { "en": "Project Name", "ar": "اسم المشروع", "he": "שם הפרויקט" },
+      "project_manager_email": { "en": "Project Manager Email", "ar": "بريد مدير المشروع", "he": "אימייל מנהל פרויקט" },
+      "project_type": { "en": "Project Type", "ar": "نوع المشروع", "he": "סוג פרויקט" },
       "notes": { "en": "Notes", "ar": "ملاحظات", "he": "הערות" },
       "residential": { "en": "Residential", "ar": "سكني", "he": "מגורים" },
       "commercial": { "en": "Commercial", "ar": "تجاري", "he": "מסחרי" },
       "industrial": { "en": "Industrial", "ar": "صناعي", "he": "תעשייתי" },
+      "infrastructure": { "en": "Infrastructure", "ar": "بنية تحتية", "he": "תשתיות" },
+      "renovation": { "en": "Renovation", "ar": "تجديد", "he": "שיפוץ" },
       "interior_design": { "en": "Interior Design", "ar": "تصميم داخلي", "he": "עיצוב פנים" },
-      "landscaping": { "en": "Landscaping", "ar": "تنسيق حدائق", "he": "גינון" },
       "other": { "en": "Other", "ar": "أخرى", "he": "אחר" },
-      "add_client_btn": { "en": "Add Client", "ar": "إضافة عميل", "he": "הוסף לקוח" },
+      "add_project_btn": { "en": "Add Project", "ar": "إضافة مشروع", "he": "הוסף פרויקט" },
       "export_csv_btn": { "en": "Export CSV", "ar": "تصدير CSV", "he": "ייצא CSV" },
       "date_added": { "en": "Date Added", "ar": "تاريخ الإضافة", "he": "תאריך הוספה" },
       "actions": { "en": "Actions", "ar": "الإجراءات", "he": "פעולות" },
@@ -430,9 +696,9 @@
       "toggle_dark_light_btn": { "en": "Toggle Dark/Light", "ar": "تبديل داكن/فاتح", "he": "החלף כהה/בהיר" },
       "session": { "en": "Session", "ar": "الجلسة", "he": "הפעלה" },
       "logout_btn_2": { "en": "Logout", "ar": "تسجيل الخروج", "he": "התנתק" },
-      "john_doe_placeholder": { "en": "John Doe", "ar": "جون دو", "he": "ג'ון דו" },
-      "john_firm_placeholder": { "en": "john@firm.com", "ar": "john@firm.com", "he": "john@firm.com" },
-      "notes_placeholder": { "en": "Brief service background...", "ar": "خلفية موجزة عن الخدمة...", "he": "רקע קצר על השירות..." }
+      "john_doe_placeholder": { "en": "Skyscraper Tower", "ar": "برج ناطحة سحاب", "he": "מגדל גורד שחקים" },
+      "john_firm_placeholder": { "en": "manager@buildstack.com", "ar": "manager@buildstack.com", "he": "manager@buildstack.com" },
+      "notes_placeholder": { "en": "Brief project background...", "ar": "خلفية موجزة عن المشروع...", "he": "רקע קצר על הפרויקט..." }
     };
 
     function setLanguage(lang) {
@@ -443,12 +709,10 @@
         elements.forEach(el => {
             const key = el.getAttribute('data-key');
             if (translations[key] && translations[key][lang]) {
-                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
                     if (el.placeholder) {
                         el.placeholder = translations[key][lang];
                     }
-                } else if (el.tagName === 'BUTTON' || el.tagName === 'H3' || el.tagName === 'STRONG' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'DIV' || el.tagName === 'TH' || el.tagName === 'P') {
-                    el.textContent = translations[key][lang];
                 } else {
                     el.textContent = translations[key][lang];
                 }
@@ -504,7 +768,39 @@
         const key = btn.dataset.key;
         const currentLang = document.getElementById('current-lang').textContent.toLowerCase();
         $('#sectionTitle').textContent = translations[key][currentLang];
+
+        // Close sidebar on mobile after clicking a link
+        if (window.innerWidth <= 768) {
+          $('.sidebar').classList.remove('active');
+          $('.wrap').classList.add('mobile-view');
+        }
       });
+    });
+
+    // Mobile menu toggle
+    $('#menuToggle').addEventListener('click', () => {
+      const sidebar = $('.sidebar');
+      const wrap = $('.wrap');
+      sidebar.classList.toggle('active');
+      wrap.classList.toggle('mobile-view', sidebar.classList.contains('active'));
+    });
+    
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+        const sidebar = $('.sidebar');
+        const menuToggle = $('#menuToggle');
+        if (window.innerWidth <= 768 && sidebar.classList.contains('active') && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+            sidebar.classList.remove('active');
+            $('.wrap').classList.remove('mobile-view');
+        }
+    });
+    
+    // Add an event listener for window resize to handle class toggling
+    window.addEventListener('resize', () => {
+        const wrap = $('.wrap');
+        if (window.innerWidth > 768) {
+            wrap.classList.remove('mobile-view');
+        }
     });
 
     // ======= Logout =======
@@ -543,20 +839,77 @@
       $('#statVisits').textContent = visitCount;
       $('#statClients').textContent = clients.length;
 
+      // Get the current text color from CSS
+      const textColor = getComputedStyle(document.body).getPropertyValue('--text').trim();
+
       // Charts
       const ctxPie = $('#chartLogPie').getContext('2d');
       const ctxOverview = $('#chartOverview').getContext('2d');
       if(chartLogPie) chartLogPie.destroy();
       if(chartOverview) chartOverview.destroy();
+      
       chartLogPie = new Chart(ctxPie, {
         type: 'pie',
-        data: { labels:['Logins','Logouts'], datasets:[{ data:[loginCount, logoutCount] }] },
-        options: { plugins:{ legend:{ position:'bottom' } } }
+        data: { 
+          labels:['Logins','Logouts'], 
+          datasets:[{ 
+            data:[loginCount, logoutCount], 
+            backgroundColor:['#e67e22', '#5e6d8a'] 
+          }] 
+        },
+        options: { 
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins:{ 
+            legend:{ 
+              position:'bottom', 
+              labels: { 
+                color: textColor
+              } 
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.parsed || 0;
+                  return `${label}: ${value}`;
+                }
+              }
+            }
+          }
+        }
       });
+      
       chartOverview = new Chart(ctxOverview, {
         type: 'doughnut',
-        data: { labels:['Users','Queries','Clients','Logs'], datasets:[{ data:[users.length, queries.length, clients.length, logs.length] }] },
-        options: { plugins:{ legend:{ position:'bottom' } } }
+        data: { 
+          labels:['Users','Queries','Projects','Logs'], 
+          datasets:[{ 
+            data:[users.length, queries.length, clients.length, logs.length], 
+            backgroundColor:['#e67e22', '#00d1ff', '#f39c12', '#9fb0d0'] 
+          }] 
+        },
+        options: { 
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins:{ 
+            legend:{ 
+              position:'bottom', 
+              labels: { 
+                color: textColor
+              } 
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.parsed || 0;
+                  return `${label}: ${value}`;
+                }
+              }
+            }
+          }
+        }
       });
     }
 
@@ -614,7 +967,7 @@
       $$('#clientsTable [data-del]').forEach(btn=>{
         btn.addEventListener('click', () => {
           const id = btn.getAttribute('data-del');
-          let list = JSON.parse(localStorage.getItem('constructionArchitectureClients')) || [];
+          let list = JSON.parse(localStorage.getItem('buildStackProjects')) || [];
           list = list.filter(x => String(x.id) !== String(id));
           saveClients(list);
           renderEverything();
@@ -624,6 +977,9 @@
 
     function renderAnalyticsCharts(){
       const {clients, queries} = loadAll();
+
+      const textColor = getComputedStyle(document.body).getPropertyValue('--text').trim();
+      const borderColor = getComputedStyle(document.body).getPropertyValue('--border').trim();
 
       // Case type distribution
       const caseCount = {};
@@ -635,8 +991,35 @@
       if(chartCases) chartCases.destroy();
       chartCases = new Chart(ctxCases, {
         type: 'bar',
-        data: { labels: caseLabels, datasets: [{ label: 'Clients', data: caseValues }] },
-        options: { plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, precision:0 } } }
+        data: { labels: caseLabels, datasets: [{ label: 'Projects', data: caseValues, backgroundColor: '#e67e22' }] },
+        options: { 
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins:{ 
+            legend:{ display:false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.parsed.y || 0;
+                  return `Projects: ${value}`;
+                }
+              }
+            }
+          }, 
+          scales:{ 
+            y:{ 
+              beginAtZero:true, 
+              precision:0, 
+              grid: { color: borderColor }, 
+              ticks: { color: textColor } 
+            }, 
+            x: { 
+              grid: { color: borderColor }, 
+              ticks: { color: textColor } 
+            } 
+          } 
+        }
       });
 
       // Top subjects from queries
@@ -650,8 +1033,35 @@
       if(chartSubjects) chartSubjects.destroy();
       chartSubjects = new Chart(ctxSubjects, {
         type: 'bar',
-        data: { labels: subjLabels, datasets: [{ label: 'Queries', data: subjValues }] },
-        options: { plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, precision:0 } } }
+        data: { labels: subjLabels, datasets: [{ label: 'Queries', data: subjValues, backgroundColor: '#00d1ff' }] },
+        options: { 
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins:{ 
+            legend:{ display:false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.parsed.y || 0;
+                  return `Queries: ${value}`;
+                }
+              }
+            }
+          }, 
+          scales:{ 
+            y:{ 
+              beginAtZero:true, 
+              precision:0, 
+              grid: { color: borderColor }, 
+              ticks: { color: textColor } 
+            }, 
+            x: { 
+              grid: { color: borderColor }, 
+              ticks: { color: textColor } 
+            } 
+          } 
+        }
       });
     }
 
@@ -670,39 +1080,38 @@
       const email = $('#clientEmail').value.trim();
       const caseType = $('#caseType').value;
       const notes = $('#notes').value.trim();
-      let list = JSON.parse(localStorage.getItem('constructionArchitectureClients')) || [];
+      let list = JSON.parse(localStorage.getItem('buildStackProjects')) || [];
       list.push({ id: Date.now(), name, email, caseType, notes, date: new Date().toISOString() });
       saveClients(list);
 
       // Optional: add a log entry
       const logs = JSON.parse(localStorage.getItem('logs')) || [];
-      logs.push(`Client added (${caseType}) • ${name} • ${new Date().toLocaleString()}`);
+      logs.push(`Project added (${caseType}) • ${name} • ${new Date().toLocaleString()}`);
       localStorage.setItem('logs', JSON.stringify(logs));
 
       // reset
       e.target.reset();
       renderEverything();
-      alert('Client saved');
+      alert('Project saved');
     });
 
     // Export CSV
     $('#exportClients').addEventListener('click', ()=>{
       const {clients} = loadAll();
-      if(!clients.length) return alert('No clients to export');
-      const headers = ['Name','Email','Service Type','Notes','Date'];
+      if(!clients.length) return alert('No projects to export');
+      const headers = ['Project Name','Manager Email','Project Type','Notes','Date'];
       const rows = clients.map(c => [c.name, c.email, c.caseType, (c.notes||'').replace(/\n/g,' '), fmtDate(c.date)]);
       const csv = [headers.join(','), ...rows.map(r=> r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
       const blob = new Blob([csv], {type:'text/csv'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url; a.download = 'clients.csv'; a.click();
+      a.href = url; a.download = 'projects.csv'; a.click();
       URL.revokeObjectURL(url);
     });
 
     // ======= Init =======
     renderEverything();
-
+    
   </script>
-
 </body>
 </html>
